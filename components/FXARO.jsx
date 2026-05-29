@@ -386,7 +386,7 @@ function Footer({onAuth, setPage}){
   const cols=[
     {title:"Platform",links:[{text:"Markets",page:"home"},{text:"AI Bot",page:"home"},{text:"Portfolio",page:"home"},{text:"News",page:"home"},{text:"Pricing",page:"home"},{text:"API Docs",page:"home"}]},
     {title:"Markets",links:[{text:"NASDAQ",page:"home"},{text:"Gold",page:"home"},{text:"Crypto",page:"home"},{text:"Forex",page:"home"},{text:"Commodities",page:"home"},{text:"Market Hours",page:"home"}]},
-    {title:"Company",links:[{text:"About",page:"about"},{text:"Blog",page:"blog"},{text:"Careers",page:"careers"},{text:"Contact",page:"contact"},{text:"Affiliates",page:"home"},{text:"Press",page:"home"}]},
+    {title:"Company",links:[{text:"About",page:"about"},{text:"Blog",page:"blog"},{text:"Careers",page:"careers"},{text:"Contact",page:"contact"},{text:"Affiliates",page:"affiliates"},{text:"Press",page:"home"}]},
     {title:"Legal",links:[{text:"Terms",page:"terms"},{text:"Privacy",page:"privacy"},{text:"Cookies",page:"home"},{text:"Risk",page:"home"},{text:"GDPR",page:"home"},{text:"Compliance",page:"home"}]},
   ];
   return(
