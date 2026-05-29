@@ -19,7 +19,13 @@
       "Bash(del \"C:\\\\Users\\\\User\\\\openclaw.bat\")",
       "Bash(wmic logicaldisk:*)",
       "Bash(findstr /v \"^$\")",
-      "Bash(curl -I http://69.169.102.89:3100)"
+      "Bash(curl -I http://69.169.102.89:3100)",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(rm -rf src dist logs)",
+      "Bash(rm tsconfig.json)",
+      "Bash(npm run *)"
     ]
   }
 }
