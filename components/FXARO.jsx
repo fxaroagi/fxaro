@@ -587,6 +587,73 @@ export default function FXARO(){
     </div>
   );
 
+
+  if(page==="affiliates") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"40px 24px"}}>
+        <h1 style={{fontSize:48,fontWeight:900,marginBottom:24,color:T.text}}>Affiliate Program</h1>
+        <p style={{fontSize:18,color:T.sub,marginBottom:40,lineHeight:1.6}}>Earn up to 35% lifetime commission by referring traders to FXARO. Help others succeed while building passive income.</p>
+        
+        <div style={{marginBottom:48}}>
+          <h2 style={{fontSize:32,fontWeight:800,marginBottom:24,color:T.text}}>Commission Tiers</h2>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:20}}>
+            {[{tier:"Starter",rate:"20%",target:"1-10/mo"},{tier:"Pro",rate:"25%",target:"11-50/mo"},{tier:"Expert",rate:"30%",target:"51-100/mo"},{tier:"Elite",rate:"35%",target:"100+/mo"}].map((t,i)=>(
+              <div key={i} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:24,transition:"all 0.3s"}}>
+                <div style={{color:T.accent,fontSize:13,fontWeight:700,marginBottom:8,letterSpacing:2}}>TIER {i+1}</div>
+                <h3 style={{fontSize:36,fontWeight:900,marginBottom:8,color:T.text}}>{t.rate}</h3>
+                <p style={{color:T.sub,fontSize:14,marginBottom:20}}>{t.target}</p>
+                <button style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"12px",fontWeight:700,cursor:"pointer",fontFamily:T.font,fontSize:14}}>Affiliate Now</button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{marginBottom:48,background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:32}}>
+          <h2 style={{fontSize:32,fontWeight:800,marginBottom:24,color:T.text}}>How to Get Started</h2>
+          <div style={{display:"grid",gap:24}}>
+            {[{num:"01",title:"Sign Up",text:"Create your affiliate account - takes 2 minutes"},{num:"02",title:"Get Your Link",text:"Receive your unique referral link and tracking dashboard"},{num:"03",title:"Share & Promote",text:"Use email, social media, website - we provide all materials"},{num:"04",title:"Earn Commissions",text:"Track real-time earnings and get paid every Friday"}].map((s,i)=>(
+              <div key={i} style={{display:"flex",gap:20}}>
+                <div style={{fontSize:28,fontWeight:900,color:T.accent,minWidth:50}}>{s.num}</div>
+                <div><h3 style={{fontWeight:800,marginBottom:6,fontSize:16}}>{s.title}</h3><p style={{color:T.sub,fontSize:14}}>{s.text}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{marginBottom:48}}>
+          <h2 style={{fontSize:32,fontWeight:800,marginBottom:24,color:T.text}}>Why Affiliates Love FXARO</h2>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:20}}>
+            {[{icon:"💰",title:"High Earnings",desc:"35% lifetime commission"},{icon:"📈",title:"Recurring Revenue",desc:"Earn monthly, forever"},{icon:"🎯",title:"Easy Promotion",desc:"Marketing materials included"},{icon:"📊",title:"Live Dashboard",desc:"Track earnings 24/7"},{icon:"🚀",title:"Fast Payouts",desc:"Weekly payments"},{icon:"👥",title:"Expert Support",desc:"Dedicated affiliate team"}].map((b,i)=>(
+              <div key={i} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:20,textAlign:"center"}}>
+                <div style={{fontSize:36,marginBottom:12}}>{b.icon}</div>
+                <h3 style={{fontWeight:800,marginBottom:6,fontSize:15}}>{b.title}</h3>
+                <p style={{color:T.sub,fontSize:13}}>{b.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{marginBottom:48,background:`linear-gradient(135deg,${T.accent}80,${T.purple}80)`,borderRadius:16,padding:48,textAlign:"center"}}>
+          <h2 style={{fontSize:36,fontWeight:900,marginBottom:16,color:"#fff"}}>Ready to Earn?</h2>
+          <p style={{fontSize:16,color:"#fff",marginBottom:32,opacity:0.95}}>Join thousands of affiliates building passive income with FXARO</p>
+          <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+            <button style={{background:"#fff",color:T.accent,border:"none",borderRadius:8,padding:"14px 36px",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:T.font}}>Apply Now</button>
+            <button style={{background:"transparent",border:"2px solid #fff",color:"#fff",borderRadius:8,padding:"12px 36px",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:T.font}}>Contact Us</button>
+          </div>
+        </div>
+
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:32}}>
+          <h3 style={{fontSize:20,fontWeight:800,marginBottom:16}}>Have Questions?</h3>
+          <p style={{color:T.sub,marginBottom:16}}>Our affiliate team is ready to help you succeed</p>
+          <p style={{color:T.accent,fontWeight:700}}>📧 affiliates@fxaro.com</p>
+        </div>
+      </div>
+    </div>
+  );
+
   if(page==="contact") return(
     <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
       <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
