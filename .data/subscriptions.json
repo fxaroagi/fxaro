@@ -1,0 +1,14 @@
+[
+  {
+    "id": "a61a3078a8a595b5285e71f3",
+    "email": "newsubscriber@example.com",
+    "createdAt": "2026-05-29T16:08:56.708Z",
+    "unsubscribeToken": "66c439da331ca10269e60da8f84cf8bde5ff4ba827a48b081fdec4daa7b2fdff"
+  },
+  {
+    "id": "2981e783d5f9ca03a02b1eb2",
+    "email": "subscriber@example.com",
+    "createdAt": "2026-05-29T16:09:10.406Z",
+    "unsubscribeToken": "58d75278a22dba5f9cc9ee11aa586d6cc8d26b4614d9d1a053cf596bc8e72aa5"
+  }
+]

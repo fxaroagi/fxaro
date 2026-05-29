@@ -1,0 +1,16 @@
+[
+  {
+    "id": "3309dc74714cdfbb3ed6578f",
+    "email": "test@example.com",
+    "passwordHash": "c1b8b58c3e7ac442b525e87709d5c1aef49a5d5acb70551be645887a978e238a",
+    "name": "Test User",
+    "plan": "Starter",
+    "emailVerified": false,
+    "verificationToken": "85caf5750e52b93f93bbcd1d9bff9e66416b6a0eeb0d1f64fea6a9635680d57f",
+    "verificationTokenExpiry": 1780157168231,
+    "createdAt": "2026-05-29T16:06:08.231Z",
+    "dailyQueriesUsed": 0,
+    "totalQueries": 0,
+    "lastQueryReset": "2026-05-29T16:06:08.231Z"
+  }
+]

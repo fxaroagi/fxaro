@@ -285,10 +285,22 @@ function HeaderChart({prices,candleData}){
 }
 
 // ── AUTH MODAL ────────────────────────────────────────────────────────────────
-function AuthModal({mode,onClose}){
+function AuthModal({mode,onClose,onSuccess}){
   const [form,setForm]=useState({name:"",email:"",password:"",confirm:""});
   const [step,setStep]=useState("form");
-  const submit=e=>{e.preventDefault();setStep("success");};
+  const [authErr,setAuthErr]=useState("");const [authLoad,setAuthLoad]=useState(false);
+  const submit=async e=>{e.preventDefault();setAuthErr("");
+    if(mode==="register"&&form.password!==form.confirm){setAuthErr("Passwords do not match");return;}
+    if(form.password.length<8){setAuthErr("Min 8 characters required");return;}
+    setAuthLoad(true);
+    try{
+      const res=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:mode==="login"?"login":"register",email:form.email,password:form.password,name:form.name})});
+      const d=await res.json();
+      if(!res.ok||d.error){setAuthErr(d.message||d.error||"Something went wrong");}
+      else{localStorage.setItem("fxaro_user",JSON.stringify(d.user));localStorage.setItem("fxaro_token",d.token||"");if(onSuccess)onSuccess(d.user);setStep("success");}
+    }catch{setAuthErr("Connection error. Please try again.");}
+    setAuthLoad(false);};
   if(step==="success") return(
     <div style={{position:"fixed",inset:0,background:"#000a",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
       <div style={{background:T.card,border:`1px solid ${T.green}`,borderRadius:16,padding:"40px 48px",maxWidth:400,textAlign:"center"}} onClick={e=>e.stopPropagation()}>
@@ -334,8 +346,8 @@ function AuthModal({mode,onClose}){
                 style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",fontFamily:T.font,boxSizing:"border-box"}}/>
             </div>
           )}
-          <button type="submit" style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"12px",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:T.font,marginBottom:14}}>
-            {mode==="login"?"Sign In →":"Create Account →"}
+          <button type="submit" style={{width:"100%",background:authLoad?T.muted:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"12px",fontWeight:700,fontSize:15,cursor:authLoad?"not-allowed":"pointer",fontFamily:T.font,marginBottom:14}}>
+            {authLoad?(mode==="login"?"Signing in...":"Creating account..."):(mode==="login"?"Sign In →":"Create Account →")}
           </button>
           {mode==="register"&&<div style={{fontSize:11,color:T.sub,textAlign:"center",marginBottom:10}}>By registering you agree to our Terms of Service and Privacy Policy</div>}
           <div style={{textAlign:"center",fontSize:13,color:T.sub}}>
@@ -360,6 +372,8 @@ function AuthModal({mode,onClose}){
 function EmailSub(){
   const [email,setEmail]=useState("");
   const [done,setDone]=useState(false);
+  const [subErr,setSubErr]=useState("");
+  const handleSub=async e=>{e.preventDefault();if(!email)return;setSubErr("");try{const r=await fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const d=await r.json();if(r.ok)setDone(true);else setSubErr(d.message||"Already subscribed.");}catch{setSubErr("Connection error.");}}
   return(
     <div style={{background:`linear-gradient(135deg,${T.accent}18,${T.purple}12)`,border:`1px solid ${T.accent}33`,borderRadius:16,padding:"32px 40px",textAlign:"center",margin:"0 24px 0"}}>
       <div style={{fontSize:11,color:T.accent,letterSpacing:3,fontWeight:700,marginBottom:8}}>STAY AHEAD OF THE MARKET</div>
@@ -368,7 +382,7 @@ function EmailSub(){
       {done?(
         <div style={{color:T.green,fontWeight:700,fontSize:15}}>✅ You're subscribed! Check your inbox to confirm.</div>
       ):(
-        <form onSubmit={e=>{e.preventDefault();if(email)setDone(true);}} style={{display:"flex",gap:10,maxWidth:480,margin:"0 auto",flexWrap:"wrap",justifyContent:"center"}}>
+        <form onSubmit={handleSub} style={{display:"flex",gap:10,maxWidth:480,margin:"0 auto",flexWrap:"wrap",justifyContent:"center"}}>
           <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Enter your email address" required
             style={{flex:1,minWidth:220,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px 16px",fontSize:14,color:T.text,outline:"none",fontFamily:T.font}}/>
           <button type="submit" style={{background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"11px 24px",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:T.font,whiteSpace:"nowrap"}}>
@@ -457,6 +471,10 @@ export default function FXARO(){
   const [candleData,setCandleData]=useState({});
   const [newsFilter,setNewsFilter]=useState("All");
   const [authModal,setAuthModal]=useState(null);
+  const [user,setUser]=useState(null);
+  const [liveNews,setLiveNews]=useState([]);
+  const [newsLoad,setNewsLoad]=useState(false);
+  const [apiPort,setApiPort]=useState(null);
   const [prices,setPrices]=useState(()=>{
     const p={};
     Object.values(MARKETS).flat().forEach(i=>{p[i.symbol]=i.price;});
@@ -501,6 +519,17 @@ export default function FXARO(){
   },[]);
 
   useEffect(()=>{chatEnd.current?.scrollIntoView({behavior:"smooth"});},[messages]);
+
+  useEffect(()=>{try{const s=localStorage.getItem("fxaro_user");if(s)setUser(JSON.parse(s));}catch{}},[]);
+
+  useEffect(()=>{if(tab!=="News")return;setNewsLoad(true);const m=newsFilter==="All"?"all":newsFilter;
+    fetch("/api/news?market="+m).then(r=>r.json()).then(d=>{if(d.articles&&d.articles.length>0)setLiveNews(d.articles);else setLiveNews([]);}).catch(()=>setLiveNews([])).finally(()=>setNewsLoad(false));},[tab,newsFilter]);
+
+  useEffect(()=>{if(tab!=="Portfolio")return;const t=localStorage.getItem("fxaro_token")||"";
+    fetch("/api/portfolio",{headers:{Authorization:"Bearer "+t}}).then(r=>r.json()).then(d=>{if(d.portfolio)setApiPort(d);}).catch(()=>{});},[tab]);
+
+  const handleAuthSuccess=u=>{setUser(u);setAuthModal(null);};
+  const handleLogout=()=>{localStorage.removeItem("fxaro_user");localStorage.removeItem("fxaro_token");setUser(null);};
 
   const sendMessage=async()=>{
     if(!input.trim()||loading)return;
@@ -733,7 +762,7 @@ export default function FXARO(){
 
   return(
     <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text,fontSize:14}}>
-      {authModal&&<AuthModal mode={authModal} onClose={()=>setAuthModal(null)}/>}
+      {authModal&&<AuthModal mode={authModal} onClose={()=>setAuthModal(null)} onSuccess={handleAuthSuccess}/>}
 
       {/* NAV */}
       <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",alignItems:"center",gap:0,position:"sticky",top:0,zIndex:100}}>
@@ -754,8 +783,7 @@ export default function FXARO(){
           ))}
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button onClick={()=>setAuthModal("login")} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,borderRadius:8,padding:"7px 16px",fontSize:13,cursor:"pointer",fontFamily:T.font}}>Sign In</button>
-          <button onClick={()=>setAuthModal("register")} style={{background:T.accent,border:"none",color:"#fff",borderRadius:8,padding:"7px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:T.font}}>Register Free</button>
+          {user?(<><div style={{fontSize:12,padding:"5px 10px",background:T.card,borderRadius:6,border:`1px solid ${T.border}`}}><span style={{color:T.accent,fontWeight:700}}>{user.name?user.name.split(" ")[0]:user.email&&user.email.split("@")[0]}</span>{user.plan&&<span style={{color:T.muted,marginLeft:6,fontSize:10}}>{user.plan.toUpperCase()}</span>}</div><button onClick={handleLogout} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,borderRadius:8,padding:"7px 14px",fontSize:12,cursor:"pointer",fontFamily:T.font}}>Sign Out</button></>):(<><button onClick={()=>setAuthModal("login")} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,borderRadius:8,padding:"7px 16px",fontSize:13,cursor:"pointer",fontFamily:T.font}}>Sign In</button><button onClick={()=>setAuthModal("register")} style={{background:T.accent,border:"none",color:"#fff",borderRadius:8,padding:"7px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:T.font}}>Register Free</button></>)}
         </div>
       </nav>
 
@@ -921,7 +949,7 @@ export default function FXARO(){
         {tab==="Portfolio"&&(
           <div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
-              {[{label:"Portfolio Value",value:"$156,241",change:"+$4,812 today",up:true},{label:"Total P&L",value:"+$22,841",change:"+17.1% all time",up:true},{label:"Open Positions",value:"5",change:"NASDAQ · Gold · Crypto · Forex",up:null}].map(s=>(
+              {[{label:"Portfolio Value",value:apiPort?"$"+Number(apiPort.summary.totalValue).toLocaleString():"$156,241",change:apiPort?"+$"+Number(apiPort.summary.totalGain).toFixed(0)+" total":"+$4,812 today",up:true},{label:"Total P&L",value:apiPort?(apiPort.summary.totalGainPct>=0?"+":"")+Number(apiPort.summary.totalGainPct).toFixed(1)+"%":"+17.1%",change:"All time",up:true},{label:"Open Positions",value:apiPort?String(apiPort.portfolio.length):"5",change:apiPort?"Live from API":"NASDAQ · Gold · Crypto · Forex",up:null}].map(s=>(
                 <Card key={s.label}>
                   <div style={{color:T.sub,fontSize:10,letterSpacing:1}}>{s.label.toUpperCase()}</div>
                   <div style={{fontSize:26,fontWeight:800,marginTop:4,color:s.up===true?T.green:s.up===false?T.red:T.text}}>{s.value}</div>
@@ -935,7 +963,7 @@ export default function FXARO(){
                 {["Symbol","Qty","Avg Price","Current","P&L","Signal"].map(h=>(
                   <div key={h} style={{color:T.sub,fontSize:10,letterSpacing:1,padding:"6px 0",borderBottom:`1px solid ${T.border}`}}>{h.toUpperCase()}</div>
                 ))}
-                {portfolio.map((pos,idx)=>{
+                {(apiPort&&apiPort.portfolio?apiPort.portfolio:portfolio).map((pos,idx)=>{
                   const cur=prices[pos.symbol]||pos.avg;
                   const pnl=((cur-pos.avg)/pos.avg*100).toFixed(2);
                   const up=parseFloat(pnl)>=0;
@@ -965,7 +993,7 @@ export default function FXARO(){
               ))}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {NEWS.map((n,i)=>{
+              { (liveNews.length>0?liveNews:NEWS).map((n,i)=>{
                 const sc=n.sentiment==="bullish"?T.green:n.sentiment==="bearish"?T.red:T.yellow;
                 return(
                   <Card key={i} style={{display:"flex",gap:14,alignItems:"center"}}>
