@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: kivyu-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: kivyu_user
+      MONGO_INITDB_ROOT_PASSWORD: KivyuPass123
+      MONGO_INITDB_DATABASE: kivyu_marketplace
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - kivyu-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kivyu-backend
+    environment:
+      MONGODB_URI: mongodb://kivyu_user:KivyuPass123@mongodb:27017/kivyu_marketplace?authSource=admin
+      JWT_SECRET: your_super_secret_jwt_key_2026_change_this_in_production
+      NODE_ENV: development
+      PORT: 5000
+      FRONTEND_URL: http://localhost:3000
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789
+      STRIPE_PUBLIC_KEY: pk_test_01234567890123456789
+      STRIPE_WEBHOOK_SECRET: whsec_test_1234567890
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: your_email@gmail.com
+      EMAIL_PASSWORD: your_app_password
+      EMAIL_FROM: noreply@kivyu.com
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    networks:
+      - kivyu-network
+    command: npm start
+
+volumes:
+  mongodb_data:
+
+networks:
+  kivyu-network:
+    driver: bridge

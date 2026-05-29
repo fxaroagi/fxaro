@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - KIVYU Marketplace</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 255, 200, 0.2);
+      padding: 50px;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo h1 {
+      font-size: 32px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00bfa5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #00ffc8;
+      box-shadow: 0 0 0 3px rgba(0, 255, 200, 0.1);
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .role-option {
+      position: relative;
+    }
+
+    .role-option input[type="radio"] {
+      display: none;
+    }
+
+    .role-label {
+      display: block;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0;
+    }
+
+    .role-option input[type="radio"]:checked + .role-label {
+      border-color: #00ffc8;
+      background: rgba(0, 255, 200, 0.1);
+    }
+
+    .btn-register {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00bfa5 100%);
+      color: #0a0e27;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-register:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 200, 0.3);
+    }
+
+    .btn-register:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+      color: #999;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 35%;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
+    .divider::before {
+      left: 0;
+    }
+
+    .divider::after {
+      right: 0;
+    }
+
+    .login-link {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #00ffc8;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .login-link a:hover {
+      color: #00bfa5;
+    }
+
+    .error-message {
+      background: #fff3cd;
+      color: #856404;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ffeaa7;
+      display: none;
+      font-size: 14px;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #00ffc8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 30px;
+      }
+
+      .logo h1 {
+        font-size: 24px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .role-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="logo">
+      <h1>KIVYU</h1>
+      <p>Join the Marketplace</p>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label>I want to:</label>
+        <div class="role-selector">
+          <div class="role-option">
+            <input type="radio" id="buyerRole" name="role" value="buyer" checked>
+            <label for="buyerRole" class="role-label">
+              <strong>Buy Services</strong><br>
+              <small>Find great services</small>
+            </label>
+          </div>
+          <div class="role-option">
+            <input type="radio" id="sellerRole" name="role" value="seller">
+            <label for="sellerRole" class="role-label">
+              <strong>Sell Services</strong><br>
+              <small>Offer my expertise</small>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="John" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="Doe" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 30px;">
+        <label style="display: flex; align-items: flex-start;">
+          <input type="checkbox" id="agreeTerms" style="width: auto; margin-right: 10px; margin-top: 3px;" required>
+          <span style="font-size: 13px; color: #666;">
+            I agree to the <a href="#" style="color: #00ffc8;">Terms of Service</a> and <a href="#" style="color: #00ffc8;">Privacy Policy</a>
+          </span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-register" id="registerBtn">Create Account</button>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <span>Creating account...</span>
+      </div>
+    </form>
+
+    <div class="divider">OR</div>
+
+    <div class="login-link">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import apiClient from '../../js/api-client.js';
+
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const errorMsg = document.getElementById('errorMessage');
+    const loading = document.getElementById('loading');
+
+    // Check if already logged in
+    if (apiClient.getToken()) {
+      window.location.href = '/frontend/pages/dashboard/buyer-dashboard.html';
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const role = document.querySelector('input[name="role"]:checked').value;
+
+      // Validation
+      if (!firstName || !lastName || !email || !password) {
+        showError('Please fill in all required fields');
+        return;
+      }
+
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+
+      try {
+        registerBtn.disabled = true;
+        loading.classList.add('show');
+        errorMsg.classList.remove('show');
+
+        const response = await apiClient.register({
+          firstName,
+          lastName,
+          email,
+          phone: phone || undefined,
+          password,
+          passwordConfirm: confirmPassword,
+          role,
+        });
+
+        if (response.success) {
+          // Set token and redirect
+          if (response.data?.token) {
+            apiClient.setToken(response.data.token);
+          }
+          window.location.href = '/frontend/pages/dashboard/buyer-dashboard.html';
+        }
+      } catch (error) {
+        showError(error.message || 'Registration failed. Please try again.');
+      } finally {
+        registerBtn.disabled = false;
+        loading.classList.remove('show');
+      }
+    });
+
+    function showError(message) {
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services - KIVYU Marketplace</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: white;
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ffc8;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #00ffc8;
+    }
+
+    .btn-logout {
+      background: #00ffc8;
+      color: #0a0e27;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+      background: #00bfa5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .filters-section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #00ffc8;
+    }
+
+    .search-bar button {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00bfa5 100%);
+      color: #0a0e27;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 200, 0.3);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .filter-group select {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .filter-group select:focus {
+      outline: none;
+      border-color: #00ffc8;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .service-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 255, 200, 0.15);
+    }
+
+    .service-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00bfa5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+    }
+
+    .service-content {
+      padding: 20px;
+    }
+
+    .service-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .service-seller {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    .service-description {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+      line-height: 1.5;
+      max-height: 50px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .service-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .service-price {
+      font-size: 20px;
+      font-weight: bold;
+      color: #00ffc8;
+    }
+
+    .service-rating {
+      font-size: 13px;
+      color: #ffa500;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #00ffc8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 40px;
+    }
+
+    .pagination button {
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      border-color: #00ffc8;
+      color: #00ffc8;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination button.active {
+      background: #00ffc8;
+      color: #0a0e27;
+      border-color: #00ffc8;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .no-results h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+
+      .services-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/" class="logo">KIVYU</a>
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/frontend/pages/marketplace/services.html" style="color: #00ffc8;">Services</a>
+        <a href="/frontend/pages/dashboard/buyer-dashboard.html">Dashboard</a>
+        <button class="btn-logout" id="logoutBtn">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="filters-section">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search services...">
+        <button onclick="searchServices()">Search</button>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter" onchange="filterServices()">
+            <option value="">All Categories</option>
+            <option value="seo">SEO Tools</option>
+            <option value="content">Content Creation</option>
+            <option value="marketing">Marketing</option>
+            <option value="design">Design</option>
+            <option value="development">Development</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="priceSort">Sort by Price</label>
+          <select id="priceSort" onchange="filterServices()">
+            <option value="">All Prices</option>
+            <option value="low">Low to High</option>
+            <option value="high">High to Low</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="ratingSort">Sort by Rating</label>
+          <select id="ratingSort" onchange="filterServices()">
+            <option value="">All Ratings</option>
+            <option value="high">Highest Rated</option>
+            <option value="low">Lowest Rated</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="servicesContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading services...</p>
+      </div>
+    </div>
+
+    <div class="pagination" id="paginationContainer"></div>
+  </div>
+
+  <script type="module">
+    import apiClient from '../../js/api-client.js';
+
+    let currentPage = 1;
+    const pageSize = 12;
+
+    // Check authentication
+    if (!apiClient.getToken()) {
+      window.location.href = '/frontend/pages/auth/login.html';
+    }
+
+    // Load services on page load
+    loadServices();
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await apiClient.logout();
+        window.location.href = '/frontend/pages/auth/login.html';
+      } catch (error) {
+        console.error('Logout failed:', error);
+        window.location.href = '/frontend/pages/auth/login.html';
+      }
+    });
+
+    async function loadServices() {
+      try {
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const priceSort = document.getElementById('priceSort').value;
+        const ratingSort = document.getElementById('ratingSort').value;
+
+        const filters = {
+          page: currentPage,
+          limit: pageSize,
+        };
+
+        if (categoryFilter) {
+          filters.category = categoryFilter;
+        }
+
+        if (priceSort === 'low') {
+          filters.sortBy = 'price';
+          filters.sortOrder = 'asc';
+        } else if (priceSort === 'high') {
+          filters.sortBy = 'price';
+          filters.sortOrder = 'desc';
+        } else if (ratingSort === 'high') {
+          filters.sortBy = 'rating';
+          filters.sortOrder = 'desc';
+        } else if (ratingSort === 'low') {
+          filters.sortBy = 'rating';
+          filters.sortOrder = 'asc';
+        }
+
+        const response = await apiClient.getServices(currentPage, pageSize, filters);
+
+        if (response.data && response.data.services.length > 0) {
+          renderServices(response.data.services);
+          renderPagination(response.data.totalPages);
+        } else {
+          document.getElementById('servicesContainer').innerHTML =
+            '<div class="no-results"><h3>No services found</h3><p>Try adjusting your filters</p></div>';
+        }
+      } catch (error) {
+        console.error('Error loading services:', error);
+        document.getElementById('servicesContainer').innerHTML =
+          '<div class="no-results"><h3>Error loading services</h3><p>' + error.message + '</p></div>';
+      }
+    }
+
+    function renderServices(services) {
+      const html = services.map(service => `
+        <div class="service-card" onclick="goToService('${service._id}')">
+          <div class="service-image">📦</div>
+          <div class="service-content">
+            <div class="service-title">${service.title}</div>
+            <div class="service-seller">by ${service.creator?.firstName || 'Anonymous'}</div>
+            <div class="service-description">${service.description}</div>
+            <div class="service-footer">
+              <div class="service-price">$${service.price}</div>
+              <div class="service-rating">⭐ ${service.rating || 'N/A'} (${service.reviewCount || 0})</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('servicesContainer').innerHTML = html;
+    }
+
+    function renderPagination(totalPages) {
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) {
+        html += `
+          <button
+            onclick="goToPage(${i})"
+            class="${i === currentPage ? 'active' : ''}"
+          >
+            ${i}
+          </button>
+        `;
+      }
+      document.getElementById('paginationContainer').innerHTML = html;
+    }
+
+    window.goToPage = function(page) {
+      currentPage = page;
+      window.scrollTo(0, 0);
+      loadServices();
+    };
+
+    window.goToService = function(serviceId) {
+      window.location.href = `/frontend/pages/marketplace/service-detail.html?id=${serviceId}`;
+    };
+
+    window.searchServices = function() {
+      const searchQuery = document.getElementById('searchInput').value;
+      if (searchQuery.trim()) {
+        window.location.href = `/frontend/pages/marketplace/search-results.html?q=${encodeURIComponent(searchQuery)}`;
+      }
+    };
+
+    window.filterServices = function() {
+      currentPage = 1;
+      loadServices();
+    };
+
+    // Allow Enter key in search
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        window.searchServices();
+      }
+    });
+  </script>
+</body>
+</html>

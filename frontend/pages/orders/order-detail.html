@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details - KIVYU</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: white;
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ffc8;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .breadcrumb {
+      margin-bottom: 30px;
+    }
+
+    .breadcrumb a {
+      color: #00ffc8;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+      color: #00bfa5;
+    }
+
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #0a0e27;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .order-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .order-info p {
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .order-info strong {
+      color: #0a0e27;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 10px 0;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-accepted {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .messages-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+
+    .message.mine {
+      background: rgba(0, 255, 200, 0.1);
+      margin-left: 30px;
+      text-align: right;
+    }
+
+    .message-sender {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message-time {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #00ffc8;
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #00ffc8 0%, #00bfa5 100%);
+      color: #0a0e27;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-send:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 200, 0.3);
+    }
+
+    .btn-send:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .review-form {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .rating-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .rating-selector input[type="radio"] {
+      display: none;
+    }
+
+    .rating-label {
+      cursor: pointer;
+      font-size: 24px;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    .rating-selector input[type="radio"]:checked + .rating-label,
+    .rating-label:hover {
+      opacity: 1;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #00ffc8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .order-header {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/" class="logo">KIVYU</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/frontend/pages/dashboard/buyer-dashboard.html">← Back to Dashboard</a>
+    </div>
+
+    <div class="section" id="orderSection">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading order details...</p>
+      </div>
+    </div>
+
+    <div class="section" id="messagesSection" style="display: none;">
+      <h2>Messages</h2>
+      <div class="messages-container" id="messagesContainer"></div>
+
+      <form id="messageForm">
+        <div class="form-group">
+          <label>Send a Message</label>
+          <textarea id="messageText" placeholder="Type your message..." required></textarea>
+        </div>
+        <button type="submit" class="btn-send">Send Message</button>
+      </form>
+    </div>
+
+    <div class="section" id="reviewSection" style="display: none;">
+      <div class="review-form">
+        <h3 style="margin-bottom: 20px;">Leave a Review</h3>
+        <form id="reviewForm">
+          <div class="form-group">
+            <label>Rating</label>
+            <div class="rating-selector">
+              <input type="radio" id="rate1" name="rating" value="1">
+              <label for="rate1" class="rating-label">⭐</label>
+
+              <input type="radio" id="rate2" name="rating" value="2">
+              <label for="rate2" class="rating-label">⭐</label>
+
+              <input type="radio" id="rate3" name="rating" value="3" checked>
+              <label for="rate3" class="rating-label">⭐</label>
+
+              <input type="radio" id="rate4" name="rating" value="4">
+              <label for="rate4" class="rating-label">⭐</label>
+
+              <input type="radio" id="rate5" name="rating" value="5">
+              <label for="rate5" class="rating-label">⭐</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Your Review</label>
+            <textarea id="reviewText" placeholder="Share your experience..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send">Submit Review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import apiClient from '../../js/api-client.js';
+
+    const orderId = new URLSearchParams(window.location.search).get('id');
+
+    if (!apiClient.getToken()) {
+      window.location.href = '/frontend/pages/auth/login.html';
+    }
+
+    if (!orderId) {
+      document.getElementById('orderSection').innerHTML = '<div class="no-data">Order not found</div>';
+    } else {
+      loadOrderDetails();
+    }
+
+    async function loadOrderDetails() {
+      try {
+        const response = await apiClient.getOrderById(orderId);
+        const order = response.data;
+
+        renderOrderDetails(order);
+
+        // Load messages
+        const messagesResponse = await apiClient.getConversation(orderId);
+        renderMessages(messagesResponse.data.messages);
+        document.getElementById('messagesSection').style.display = 'block';
+
+        // Show review section if order is completed
+        if (order.status === 'completed') {
+          document.getElementById('reviewSection').style.display = 'block';
+          setupReviewForm(order);
+        }
+
+        // Setup message form
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          await sendMessage();
+        });
+
+      } catch (error) {
+        console.error('Error loading order:', error);
+        document.getElementById('orderSection').innerHTML =
+          '<div class="no-data">Error loading order. ' + error.message + '</div>';
+      }
+    }
+
+    function renderOrderDetails(order) {
+      const html = `
+        <h2>Order #${order._id.substring(0, 8).toUpperCase()}</h2>
+        <div class="order-header">
+          <div class="order-info">
+            <p><strong>Service:</strong> ${order.service?.title || 'Unknown'}</p>
+            <p><strong>Seller:</strong> ${order.seller?.firstName || 'Unknown'}</p>
+            <p><strong>Price:</strong> $${order.price?.original || '0'}</p>
+            <p><strong>Platform Fee:</strong> $${order.price?.platformFee || '0'}</p>
+          </div>
+          <div class="order-info">
+            <p><strong>Status:</strong></p>
+            <span class="status-badge status-${order.status.replace('-', ' ').split(' ').join('')}">
+              ${order.status}
+            </span>
+            <p style="margin-top: 15px;"><strong>Ordered:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+            <p><strong>Est. Delivery:</strong> ${new Date(order.estimatedDeliveryDate).toLocaleDateString()}</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('orderSection').innerHTML = html;
+    }
+
+    function renderMessages(messages) {
+      if (!messages || messages.length === 0) {
+        document.getElementById('messagesContainer').innerHTML =
+          '<div style="text-align: center; color: #999; padding: 20px;">No messages yet. Start the conversation!</div>';
+        return;
+      }
+
+      const html = messages.map(msg => `
+        <div class="message ${msg.isMine ? 'mine' : ''}">
+          <div class="message-sender">${msg.senderName}</div>
+          <div class="message-text">${msg.content}</div>
+          <div class="message-time">${new Date(msg.createdAt).toLocaleString()}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('messagesContainer').innerHTML = html;
+      // Auto-scroll to bottom
+      document.getElementById('messagesContainer').scrollTop =
+        document.getElementById('messagesContainer').scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = document.getElementById('messageText').value.trim();
+      if (!text) return;
+
+      try {
+        document.getElementById('messageText').disabled = true;
+        await apiClient.sendMessage({
+          orderId,
+          content: text,
+        });
+
+        document.getElementById('messageText').value = '';
+        // Reload messages
+        const response = await apiClient.getConversation(orderId);
+        renderMessages(response.data.messages);
+      } catch (error) {
+        alert('Failed to send message: ' + error.message);
+      } finally {
+        document.getElementById('messageText').disabled = false;
+      }
+    }
+
+    function setupReviewForm(order) {
+      document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const rating = parseInt(document.querySelector('input[name="rating"]:checked').value);
+        const text = document.getElementById('reviewText').value.trim();
+
+        if (!text || text.length < 10) {
+          alert('Review must be at least 10 characters');
+          return;
+        }
+
+        try {
+          document.getElementById('reviewForm').style.opacity = '0.6';
+          document.querySelector('button[type="submit"]').disabled = true;
+
+          await apiClient.createReview({
+            orderId,
+            serviceId: order.service._id,
+            sellerId: order.seller._id,
+            rating,
+            text,
+          });
+
+          alert('Review submitted successfully!');
+          document.getElementById('reviewSection').style.display = 'none';
+
+        } catch (error) {
+          alert('Failed to submit review: ' + error.message);
+        } finally {
+          document.getElementById('reviewForm').style.opacity = '1';
+          document.querySelector('button[type="submit"]').disabled = false;
+        }
+      });
+    }
+
+    window.sendMessage = sendMessage;
+  </script>
+</body>
+</html>

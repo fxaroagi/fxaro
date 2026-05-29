@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -NoProfile -Command \". ''C:\\\\Users\\\\User\\\\Documents\\\\WindowsPowerShell\\\\profile.ps1''; claude ''What is the capital of Germany?''\")",
+      "Read(//c/Users/User/.openclaw/**)",
+      "Bash(python claude.py status)",
+      "Read(//c/Users/User/**)",
+      "Bash(python claude.py)",
+      "Bash(done)",
+      "Bash(/tmp/test_apis.py:*)",
+      "Bash(python /tmp/test_apis.py)",
+      "Bash(/tmp/find_free_models.py:*)",
+      "Bash(timeout 30 python /tmp/find_free_models.py)",
+      "Bash(/tmp/comprehensive_all_apis.py:*)",
+      "Bash(timeout 240 python /tmp/comprehensive_all_apis.py)",
+      "Bash(/tmp/verify_all.py:*)",
+      "Bash(timeout 120 python /tmp/verify_all.py)",
+      "Bash(python openclaw.py \"status\")",
+      "Bash(del \"C:\\\\Users\\\\User\\\\openclaw.bat\")",
+      "Bash(wmic logicaldisk:*)",
+      "Bash(findstr /v \"^$\")",
+      "Bash(curl -I http://69.169.102.89:3100)"
+    ]
+  }
+}

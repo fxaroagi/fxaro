@@ -1,0 +1,45 @@
+# KIVYU Marketplace - robots.txt
+# This file specifies crawling rules for search engines
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+Allow: *.html
+Allow: *.css
+Allow: *.js
+Allow: *.png
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.gif
+Allow: *.svg
+Allow: *.webp
+
+# Disallow private or admin areas (add as needed)
+Disallow: /admin/
+Disallow: /private/
+Disallow: /tmp/
+
+# Slow down aggressive crawlers
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+# Google-specific directives
+User-agent: Googlebot
+Allow: /
+
+# Bing-specific directives
+User-agent: Bingbot
+Allow: /
+
+# Yandex directives
+User-agent: Yandex
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.kivyu.com/sitemap.xml
+
+# Crawl delay for other user agents (in seconds)
+Crawl-delay: 1
