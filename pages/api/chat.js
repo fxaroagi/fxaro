@@ -1,68 +1,78 @@
 export default async function handler(req, res) {
+  // Allow CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, system } = req.body;
-
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'messages array required' });
-  }
-
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    console.error('OPENROUTER_API_KEY not set');
-    return res.status(500).json({ error: 'API key not configured' });
-  }
-
   try {
-    // Build messages array with system message if provided
-    let allMessages = [];
+    const { messages, system } = req.body;
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'messages array required' });
+    }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey || apiKey === 'paste_your_key_here') {
+      return res.status(500).json({ error: 'OpenRouter API key not configured' });
+    }
+
+    // Build messages with system prompt
+    const requestMessages = [];
     if (system) {
-      allMessages.push({
+      requestMessages.push({
         role: 'system',
         content: system
       });
     }
-    allMessages = allMessages.concat(messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    })));
+    requestMessages.push(...messages);
 
-    console.log('Calling OpenRouter API with', allMessages.length, 'messages');
-
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
         'HTTP-Referer': 'https://fxaro.com',
         'X-Title': 'FXARO'
       },
       body: JSON.stringify({
         model: 'mistralai/mistral-7b-instruct:free',
-        messages: allMessages,
-        max_tokens: 1000,
+        messages: requestMessages,
+        max_tokens: 500,
         temperature: 0.7
-      }),
+      })
     });
 
-    console.log('OpenRouter response status:', response.status);
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('OpenRouter error:', error);
-      return res.status(response.status).json({ error: error || 'API error' });
+    if (!openrouterResponse.ok) {
+      const errorData = await openrouterResponse.text();
+      return res.status(openrouterResponse.status).json({
+        error: `OpenRouter error: ${openrouterResponse.status}`,
+        details: errorData.substring(0, 200)
+      });
     }
 
-    const data = await response.json();
-    console.log('OpenRouter response:', data.choices?.[0]?.message?.content?.substring(0, 50));
+    const data = await openrouterResponse.json();
 
-    const content = data.choices?.[0]?.message?.content || 'No response from API';
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      return res.status(500).json({ error: 'Invalid response format from OpenRouter' });
+    }
 
-    return res.status(200).json({ content });
+    return res.status(200).json({
+      content: data.choices[0].message.content
+    });
   } catch (error) {
-    console.error('Chat API error:', error.message);
-    return res.status(500).json({ error: `Server error: ${error.message}` });
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 }
