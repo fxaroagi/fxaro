@@ -382,12 +382,12 @@ function EmailSub(){
 }
 
 // ── FOOTER ────────────────────────────────────────────────────────────────────
-function Footer({onAuth, setPage}){
+function Footer({onAuth, setPage, setTab}){
   const cols=[
-    {title:"Platform",links:[{text:"Markets",page:"home"},{text:"AI Bot",page:"home"},{text:"Portfolio",page:"home"},{text:"News",page:"home"},{text:"Pricing",page:"home"},{text:"API Docs",page:"home"}]},
-    {title:"Markets",links:[{text:"NASDAQ",page:"home"},{text:"Gold",page:"home"},{text:"Crypto",page:"home"},{text:"Forex",page:"home"},{text:"Commodities",page:"home"},{text:"Market Hours",page:"home"}]},
+    {title:"Platform",links:[{text:"Markets",page:"home",tab:"Markets"},{text:"AI Bot",page:"home",tab:"AI Bot"},{text:"Portfolio",page:"home",tab:"Portfolio"},{text:"News",page:"home",tab:"News"},{text:"Pricing",page:"home",tab:"Pricing"},{text:"API Docs",page:"home",tab:"Pricing"}]},
+    {title:"Markets",links:[{text:"NASDAQ",page:"home",tab:"Markets"},{text:"Gold",page:"home",tab:"Markets"},{text:"Crypto",page:"home",tab:"Markets"},{text:"Forex",page:"home",tab:"Markets"},{text:"Commodities",page:"home",tab:"Markets"},{text:"Market Hours",page:"home",tab:"Markets"}]},
     {title:"Company",links:[{text:"About",page:"about"},{text:"Blog",page:"blog"},{text:"Careers",page:"careers"},{text:"Contact",page:"contact"},{text:"Affiliates",page:"affiliates"},{text:"Press",page:"home"}]},
-    {title:"Legal",links:[{text:"Terms",page:"terms"},{text:"Privacy",page:"privacy"},{text:"Cookies",page:"home"},{text:"Risk",page:"home"},{text:"GDPR",page:"home"},{text:"Compliance",page:"home"}]},
+    {title:"Legal",links:[{text:"Terms",page:"terms"},{text:"Privacy",page:"privacy"},{text:"Cookies",page:"privacy"},{text:"Risk",page:"risk"},{text:"GDPR",page:"privacy"},{text:"Compliance",page:"terms"}]},
   ];
   return(
     <footer style={{background:T.surface,borderTop:`1px solid ${T.border}`,padding:"48px 24px 24px"}}>
@@ -416,7 +416,7 @@ function Footer({onAuth, setPage}){
               <div style={{fontWeight:700,fontSize:12,color:T.text,letterSpacing:1,marginBottom:14}}>{col.title.toUpperCase()}</div>
               <div style={{display:"flex",flexDirection:"column",gap:9}}>
                 {col.links.map(link=>(
-                  <button key={link.text} onClick={()=>setPage(link.page)}
+                  <button key={link.text} onClick={()=>{setPage(link.page);if(link.tab&&setTab)setTab(link.tab);}}
                     style={{background:"none",border:"none",color:T.sub,fontSize:13,cursor:"pointer",transition:"color 0.2s",textAlign:"left",fontFamily:T.font,padding:0}}
                     onMouseEnter={e=>e.target.style.color=T.accent}
                     onMouseLeave={e=>e.target.style.color=T.sub}>
@@ -684,6 +684,32 @@ export default function FXARO(){
         <p style={{marginBottom:16}}>Permission is granted to use materials for personal, non-commercial viewing only.</p>
         <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>3. Disclaimer</h2>
         <p>Trading involves substantial risk of loss. Past performance is not indicative of future results.</p>
+      </div>
+    </div>
+  );
+
+  if(page==="risk") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:800,margin:"0 auto",padding:"40px 24px",color:T.sub}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:8,color:T.text}}>Risk Disclosure</h1>
+        <p style={{marginBottom:32,fontSize:13}}>Last updated: May 2026</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Trading Risk Warning</h2>
+        <p style={{marginBottom:16}}>Trading in financial markets involves substantial risk of loss and is not appropriate for all investors. The high degree of leverage can work against you as well as for you.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>AI Signal Limitations</h2>
+        <p style={{marginBottom:16}}>FXARO AI signals are for informational and educational purposes only. They do not constitute financial advice. Past performance is not indicative of future results.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Market Risk</h2>
+        <p style={{marginBottom:16}}>Prices of financial instruments can move rapidly. You can lose more than your initial investment. Only trade with money you can afford to lose.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Leverage Risk</h2>
+        <p style={{marginBottom:16}}>Leveraged products amplify both gains and losses. A small adverse market movement can result in a loss greater than your deposit.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>No Guarantee of Profit</h2>
+        <p style={{marginBottom:16}}>FXARO does not guarantee any profit or protection against losses. All trading decisions are your sole responsibility.</p>
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:20,marginTop:32}}>
+          <p style={{color:T.red,fontWeight:700,marginBottom:8}}>⚠️ Important Notice</p>
+          <p style={{fontSize:13}}>By using FXARO, you acknowledge that you have read, understood, and accept all risks associated with trading financial instruments.</p>
+        </div>
       </div>
     </div>
   );
@@ -997,7 +1023,7 @@ export default function FXARO(){
       </div>
 
       {/* FOOTER */}
-      <Footer onAuth={setAuthModal} setPage={setPage}/>
+      <Footer onAuth={setAuthModal} setPage={setPage} setTab={setTab}/>
     </div>
   );
 }
