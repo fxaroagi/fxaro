@@ -1,3 +1,6 @@
+import { users } from '../../lib/db.js';
+import crypto from 'crypto';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,58 +16,99 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { action, email, password, name } = req.body;
-
-  if (!action || !email || !password) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  // Simulate user database (in production, use actual database)
-  const users = {};
-
   try {
+    const { action, email, password, name } = req.body;
+
+    if (!action || !email || !password) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     if (action === 'register') {
       if (!name) {
         return res.status(400).json({ error: 'Name required for registration' });
       }
 
-      const userKey = `user_${email}`;
-      const mockUser = {
-        id: Math.random().toString(36).substr(2, 9),
-        name,
-        email,
-        password: Buffer.from(password).toString('base64'),
-        createdAt: new Date().toISOString(),
-        plan: 'Starter',
-      };
+      // Validate password strength
+      if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+      }
 
-      return res.status(201).json({
-        success: true,
-        message: 'Account created successfully',
-        user: { id: mockUser.id, name: mockUser.name, email: mockUser.email, plan: mockUser.plan },
-        token: Buffer.from(JSON.stringify(mockUser)).toString('base64'),
-      });
+      if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain uppercase letter and number' });
+      }
+
+      try {
+        const user = users.create(email, password, name);
+        const token = Buffer.from(JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+        })).toString('base64');
+
+        return res.status(201).json({
+          success: true,
+          message: 'Account created successfully. Please verify your email.',
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            plan: user.plan,
+            emailVerified: user.emailVerified,
+          },
+          token: token,
+        });
+      } catch (error) {
+        return res.status(400).json({
+          error: 'Registration failed',
+          message: error.message,
+        });
+      }
     }
 
     if (action === 'login') {
-      const mockUser = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: email.split('@')[0],
-        email,
-        plan: 'Pro',
-        createdAt: new Date().toISOString(),
-      };
+      try {
+        const user = users.findByEmail(email);
+        
+        if (!user) {
+          return res.status(401).json({ error: 'Invalid email or password' });
+        }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Logged in successfully',
-        user: { id: mockUser.id, name: mockUser.name, email: mockUser.email, plan: mockUser.plan },
-        token: Buffer.from(JSON.stringify(mockUser)).toString('base64'),
-      });
+        const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+        if (user.passwordHash !== passwordHash) {
+          return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = Buffer.from(JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+        })).toString('base64');
+
+        return res.status(200).json({
+          success: true,
+          message: 'Logged in successfully',
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            plan: user.plan,
+            emailVerified: user.emailVerified,
+          },
+          token: token,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          error: 'Login failed',
+          message: error.message,
+        });
+      }
     }
 
     return res.status(400).json({ error: 'Invalid action' });
   } catch (error) {
+    console.error('Auth error:', error);
     return res.status(500).json({
       error: 'Authentication failed',
       message: error.message,
