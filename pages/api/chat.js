@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         'X-Title': 'FXARO'
       },
       body: JSON.stringify({
-        model: 'mistralai/mistral-7b-instruct:free',
+        model: 'openrouter/auto',
         messages: requestMessages,
         max_tokens: 500,
         temperature: 0.7

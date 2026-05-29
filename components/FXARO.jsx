@@ -9,7 +9,6 @@ const T = {
   mono: "'JetBrains Mono','Courier New',monospace", gridLine: "#111f36",
 };
 
-// ── DATA ──────────────────────────────────────────────────────────────────────
 const TICKER_ITEMS = [
   { symbol:"NVDA",    price:875.63,  change:3.87,  cat:"NASDAQ" },
   { symbol:"AAPL",    price:189.42,  change:1.23,  cat:"NASDAQ" },
@@ -96,107 +95,25 @@ const fmt = p => {
   return p.toFixed(5);
 };
 
-// ── CANDLE GENERATOR ──────────────────────────────────────────────────────────
 const genCandles = (base, count=80, vol=0.012) => {
-  let close = base;
-  return Array.from({length:count},(_,i)=>{
-    const open  = close;
-    const move  = (Math.random()-0.488)*vol;
-    close       = parseFloat((open*(1+move)).toFixed(base>100?2:5));
-    const hi    = Math.max(open,close)*(1+Math.random()*vol*0.6);
-    const lo    = Math.min(open,close)*(1-Math.random()*vol*0.6);
-    const volume= Math.floor(Math.random()*9000+1000);
-    return {i, open:parseFloat(open.toFixed(base>100?2:5)), close:parseFloat(close.toFixed(base>100?2:5)),
-            high:parseFloat(hi.toFixed(base>100?2:5)), low:parseFloat(lo.toFixed(base>100?2:5)), volume};
-  });
+  const candles = [];
+  let open = base;
+  for (let i = 0; i < count; i++) {
+    const change = (Math.random() - 0.485) * vol * open;
+    const close = open + change;
+    const high = Math.max(open, close) * (1 + Math.random() * 0.005);
+    const low = Math.min(open, close) * (1 - Math.random() * 0.005);
+    candles.push({ i, open, close, high, low });
+    open = close;
+  }
+  return candles;
 };
 
-const genSparkCandles = (base,count=20) => genCandles(base,count,0.015);
+const genSparkCandles = (base, count=20, vol=0.015) => genCandles(base, count, vol);
 
-// ── NINJA-STYLE CANDLESTICK CHART ─────────────────────────────────────────────
-function CandleChart({candles, height=300, color}) {
-  if(!candles||candles.length===0) return null;
-  const W=800, H=height, PL=58, PR=12, PT=14, PB=32;
-  const cw = (W-PL-PR)/candles.length;
-  const prices = candles.flatMap(c=>[c.high,c.low]);
-  const minP=Math.min(...prices), maxP=Math.max(...prices);
-  const range=maxP-minP||1;
-  const py = v => PT+(H-PT-PB)*(1-(v-minP)/range);
-  const maxVol=Math.max(...candles.map(c=>c.volume));
-  const GRID=5;
-
-  return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H+60}`} style={{display:"block"}}>
-      {/* Background */}
-      <rect width={W} height={H+60} fill={T.bg}/>
-      {/* Grid lines */}
-      {Array.from({length:GRID+1},(_,i)=>{
-        const y=PT+(H-PT-PB)*(i/GRID);
-        const val=maxP-range*(i/GRID);
-        return (
-          <g key={i}>
-            <line x1={PL} x2={W-PR} y1={y} y2={y} stroke={T.gridLine} strokeWidth={0.8}/>
-            <text x={PL-4} y={y+4} textAnchor="end" fill={T.sub} fontSize={9} fontFamily={T.mono}>
-              {val>1000?val.toLocaleString("en-US",{maximumFractionDigits:0}):val.toFixed(val>10?2:4)}
-            </text>
-          </g>
-        );
-      })}
-      {/* Vertical grid every 10 candles */}
-      {candles.filter((_,i)=>i%10===0).map(c=>(
-        <line key={c.i} x1={PL+c.i*cw+cw/2} x2={PL+c.i*cw+cw/2} y1={PT} y2={H-PB} stroke={T.gridLine} strokeWidth={0.5}/>
-      ))}
-      {/* Volume bars */}
-      {candles.map(c=>{
-        const x=PL+c.i*cw; const bh=(c.volume/maxVol)*40;
-        const up=c.close>=c.open;
-        return <rect key={c.i} x={x+cw*0.15} y={H-PB-bh} width={cw*0.7} height={bh} fill={up?T.green+"55":T.red+"55"}/>;
-      })}
-      {/* Candles */}
-      {candles.map(c=>{
-        const x=PL+c.i*cw; const up=c.close>=c.open;
-        const col=up?T.green:T.red;
-        const bodyTop=py(Math.max(c.open,c.close));
-        const bodyBot=py(Math.min(c.open,c.close));
-        const bodyH=Math.max(bodyBot-bodyTop,1);
-        const mid=x+cw/2;
-        return (
-          <g key={c.i}>
-            <line x1={mid} x2={mid} y1={py(c.high)} y2={py(c.low)} stroke={col} strokeWidth={0.8}/>
-            <rect x={x+cw*0.12} y={bodyTop} width={cw*0.76} height={bodyH} fill={up?col:T.bg} stroke={col} strokeWidth={0.8}/>
-          </g>
-        );
-      })}
-      {/* Last price line */}
-      {candles.length>0&&(()=>{
-        const last=candles[candles.length-1].close;
-        const y=py(last); const up=candles[candles.length-1].close>=candles[candles.length-1].open;
-        return (
-          <g>
-            <line x1={PL} x2={W-PR} y1={y} y2={y} stroke={up?T.green:T.red} strokeDasharray="3 2" strokeWidth={1}/>
-            <rect x={W-PR} y={y-8} width={46} height={16} rx={3} fill={up?T.green:T.red}/>
-            <text x={W-PR+3} y={y+4} fill="#000" fontSize={9} fontFamily={T.mono} fontWeight={700}>
-              {last>1000?last.toLocaleString("en-US",{maximumFractionDigits:0}):last.toFixed(last>10?2:4)}
-            </text>
-          </g>
-        );
-      })()}
-      {/* X axis labels */}
-      {candles.filter((_,i)=>i%15===0).map(c=>(
-        <text key={c.i} x={PL+c.i*cw+cw/2} y={H-PB+12} textAnchor="middle" fill={T.sub} fontSize={9} fontFamily={T.mono}>
-          {`${c.i}`}
-        </text>
-      ))}
-      {/* Volume label */}
-      <text x={PL+4} y={H-PB-44} fill={T.sub} fontSize={9} fontFamily={T.mono}>VOL</text>
-    </svg>
-  );
-}
-
-// ── MINI CANDLE SPARK ─────────────────────────────────────────────────────────
-function CandleSpark({candles}){
-  if(!candles||candles.length<2) return null;
-  const W=80,H=32,prices=candles.flatMap(c=>[c.high,c.low]);
+function CandleChart({candles,W=300,H=100}){
+  if(!candles||candles.length<2) return <div style={{height:H,color:T.sub}}>No data</div>;
+  const prices=candles.map(c=>c.close);
   const minP=Math.min(...prices),maxP=Math.max(...prices),range=maxP-minP||1;
   const cw=W/candles.length;
   const py=v=>H*(1-(v-minP)/range);
@@ -216,7 +133,6 @@ function CandleSpark({candles}){
   );
 }
 
-// ── TICKER BAR ────────────────────────────────────────────────────────────────
 function TickerBar({prices}){
   const items=[...TICKER_ITEMS,...TICKER_ITEMS];
   const cc={NASDAQ:T.accent,GOLD:T.gold,CRYPTO:T.purple,FOREX:T.green,OIL:"#fb923c"};
@@ -239,7 +155,6 @@ function TickerBar({prices}){
   );
 }
 
-// ── HEADER LIVE CHARTS ────────────────────────────────────────────────────────
 function HeaderChart({prices,candleData}){
   const featured=[
     {symbol:"NVDA",   label:"NASDAQ · NVDA",  color:T.accent},
@@ -268,10 +183,9 @@ function HeaderChart({prices,candleData}){
                   const ps=candles.map(c=>c.close);
                   const mn=Math.min(...ps),mx=Math.max(...ps),rng=mx-mn||1;
                   const pts=candles.map((c,i)=>`${(i/(candles.length-1))*200},${52-(c.close-mn)/rng*46}`).join(" ");
-                  const area=`M0,52 L${pts.split(" ").map(p=>{const[x,y]=p.split(",");return`${x},${y}`;}).join(" L")} L200,52 Z`;
                   return(<>
                     <defs><linearGradient id={`hg${idx}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={f.color} stopOpacity={0.4}/><stop offset="100%" stopColor={f.color} stopOpacity={0}/></linearGradient></defs>
-                    <path d={area} fill={`url(#hg${idx})`}/>
+                    <path d={`M0,52 L${pts.split(" ").map(p=>{const[x,y]=p.split(",");return`${x},${y}`;}).join(" L")} L200,52 Z`} fill={`url(#hg${idx})`}/>
                     <polyline points={pts} fill="none" stroke={f.color} strokeWidth="1.5"/>
                   </>);
                 })()}
@@ -284,21 +198,57 @@ function HeaderChart({prices,candleData}){
   );
 }
 
-// ── AUTH MODAL ────────────────────────────────────────────────────────────────
-function AuthModal({mode,onClose}){
+function AuthModal({mode,onClose,onSuccess}){
   const [form,setForm]=useState({name:"",email:"",password:"",confirm:""});
   const [step,setStep]=useState("form");
-  const submit=e=>{e.preventDefault();setStep("success");};
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+
+  const submit=async(e)=>{
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res=await fetch("/api/auth",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          action:mode,
+          name:form.name,
+          email:form.email,
+          password:form.password,
+        })
+      });
+
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error);
+
+      localStorage.setItem("user",JSON.stringify(data.user));
+      localStorage.setItem("token",data.token);
+      setStep("success");
+
+      setTimeout(()=>{
+        onSuccess(data.user);
+        onClose();
+      },1500);
+    } catch(err){
+      setError(err.message||"Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if(step==="success") return(
     <div style={{position:"fixed",inset:0,background:"#000a",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
       <div style={{background:T.card,border:`1px solid ${T.green}`,borderRadius:16,padding:"40px 48px",maxWidth:400,textAlign:"center"}} onClick={e=>e.stopPropagation()}>
         <div style={{fontSize:48,marginBottom:12}}>✅</div>
         <div style={{fontSize:20,fontWeight:800,color:T.green,marginBottom:8}}>{mode==="login"?"Welcome back!":"Account Created!"}</div>
-        <div style={{color:T.sub,marginBottom:20}}>{mode==="login"?"You're now logged into FXARO.":"Check your email to verify your account then log in."}</div>
-        <button onClick={onClose} style={{background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"10px 32px",fontWeight:600,fontSize:14,cursor:"pointer",fontFamily:T.font}}>Continue to FXARO →</button>
+        <div style={{color:T.sub,marginBottom:20}}>{mode==="login"?"You're now logged into FXARO.":"Check your email to verify your account."}</div>
       </div>
     </div>
   );
+
   return(
     <div style={{position:"fixed",inset:0,background:"#000b",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
       <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:"32px 40px",width:"100%",maxWidth:420}} onClick={e=>e.stopPropagation()}>
@@ -309,6 +259,7 @@ function AuthModal({mode,onClose}){
           </div>
           <button onClick={onClose} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,width:32,height:32,borderRadius:8,cursor:"pointer",fontSize:16,fontFamily:T.font}}>✕</button>
         </div>
+        {error&&<div style={{background:`${T.red}22`,border:`1px solid ${T.red}`,color:T.red,borderRadius:8,padding:10,marginBottom:14,fontSize:13}}>{error}</div>}
         <form onSubmit={submit}>
           {mode==="register"&&(
             <div style={{marginBottom:14}}>
@@ -334,29 +285,16 @@ function AuthModal({mode,onClose}){
                 style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",fontFamily:T.font,boxSizing:"border-box"}}/>
             </div>
           )}
-          <button type="submit" style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"12px",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:T.font,marginBottom:14}}>
-            {mode==="login"?"Sign In →":"Create Account →"}
+          <button type="submit" disabled={loading} style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"12px",fontWeight:700,fontSize:15,cursor:loading?"not-allowed":"pointer",fontFamily:T.font,marginBottom:14,opacity:loading?0.7:1}}>
+            {loading?"Loading...":mode==="login"?"Sign In →":"Create Account →"}
           </button>
           {mode==="register"&&<div style={{fontSize:11,color:T.sub,textAlign:"center",marginBottom:10}}>By registering you agree to our Terms of Service and Privacy Policy</div>}
-          <div style={{textAlign:"center",fontSize:13,color:T.sub}}>
-            {mode==="login"?"Don't have an account? ":"Already have an account? "}
-          </div>
         </form>
-        {mode==="login"&&(
-          <div style={{display:"flex",gap:10,marginTop:16}}>
-            {["Google","Apple"].map(p=>(
-              <button key={p} style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,color:T.text,borderRadius:8,padding:"9px",fontSize:13,cursor:"pointer",fontFamily:T.font}}>
-                {p==="Google"?"🔵":"⚫"} {p}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-// ── EMAIL SUBSCRIPTION ────────────────────────────────────────────────────────
 function EmailSub(){
   const [email,setEmail]=useState("");
   const [done,setDone]=useState(false);
@@ -381,26 +319,24 @@ function EmailSub(){
   );
 }
 
-// ── FOOTER ────────────────────────────────────────────────────────────────────
-function Footer({onAuth}){
+function Footer({onAuth,onPage}){
   const cols=[
-    {title:"Platform",links:["Markets","AI Bot","Portfolio Tracker","News & Sentiment","Pricing","API Docs"]},
-    {title:"Markets",links:["NASDAQ Stocks","Gold & Metals","Crypto","Forex","Commodities","Market Hours"]},
-    {title:"Company", links:["About FXARO","Careers","Press Kit","Blog","Contact Us","Affiliates"]},
-    {title:"Legal",   links:["Terms of Service","Privacy Policy","Cookie Policy","Risk Disclaimer","GDPR","Compliance"]},
+    {title:"Platform",links:[{label:"Markets",page:"markets"},{label:"AI Bot",page:"bot"},{label:"Portfolio",page:"dashboard"},{label:"News",page:"news"},{label:"Pricing",page:"pricing"},{label:"API Docs",page:"api"}]},
+    {title:"Markets",links:[{label:"NASDAQ",page:"nasdaq"},{label:"Gold",page:"gold"},{label:"Crypto",page:"crypto"},{label:"Forex",page:"forex"},{label:"Commodities",page:"commodities"},{label:"Market Hours",page:"hours"}]},
+    {title:"Company",links:[{label:"About",page:"about"},{label:"Blog",page:"blog"},{label:"Careers",page:"careers"},{label:"Contact",page:"contact"},{label:"Affiliates",page:"affiliates"},{label:"Press",page:"press"}]},
+    {title:"Legal",links:[{label:"Terms",page:"terms"},{label:"Privacy",page:"privacy"},{label:"Cookies",page:"cookies"},{label:"Risk",page:"risk"},{label:"GDPR",page:"gdpr"},{label:"Compliance",page:"compliance"}]},
   ];
   return(
     <footer style={{background:T.surface,borderTop:`1px solid ${T.border}`,padding:"48px 24px 24px"}}>
       <div style={{maxWidth:1200,margin:"0 auto"}}>
         <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr 1fr",gap:32,marginBottom:40}}>
-          {/* Brand col */}
           <div>
-            <a href="https://fxaro.com" target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
+            <div onClick={()=>onPage("home")} style={{cursor:"pointer",textDecoration:"none"}}>
               <div style={{fontSize:26,fontWeight:900,color:T.accent,marginBottom:4,letterSpacing:-0.5}}>
                 FX<span style={{color:T.text}}>ARO</span>
               </div>
               <div style={{fontSize:10,color:T.sub,letterSpacing:3,marginBottom:14}}>AI TRADING PLATFORM</div>
-            </a>
+            </div>
             <div style={{color:T.sub,fontSize:13,lineHeight:1.7,marginBottom:16}}>
               Professional AI-powered trading signals across NASDAQ, Gold, Crypto, Forex and Commodities. Built for serious traders.
             </div>
@@ -410,24 +346,22 @@ function Footer({onAuth}){
               ))}
             </div>
           </div>
-          {/* Link cols */}
           {cols.map(col=>(
             <div key={col.title}>
               <div style={{fontWeight:700,fontSize:12,color:T.text,letterSpacing:1,marginBottom:14}}>{col.title.toUpperCase()}</div>
               <div style={{display:"flex",flexDirection:"column",gap:9}}>
                 {col.links.map(link=>(
-                  <a key={link} href="https://fxaro.com" target="_blank" rel="noopener noreferrer"
-                    style={{color:T.sub,fontSize:13,textDecoration:"none",cursor:"pointer",transition:"color 0.2s"}}
+                  <button key={link.label} onClick={()=>onPage(link.page)}
+                    style={{background:"none",border:"none",color:T.sub,fontSize:13,textDecoration:"none",cursor:"pointer",transition:"color 0.2s",padding:0,fontFamily:T.font,textAlign:"left"}}
                     onMouseEnter={e=>e.target.style.color=T.accent}
                     onMouseLeave={e=>e.target.style.color=T.sub}>
-                    {link}
-                  </a>
+                    {link.label}
+                  </button>
                 ))}
               </div>
             </div>
           ))}
         </div>
-        {/* Bottom bar */}
         <div style={{borderTop:`1px solid ${T.border}`,paddingTop:20,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
           <div style={{color:T.muted,fontSize:12}}>© 2026 FXARO.COM · All rights reserved · Not financial advice · Trading involves substantial risk of loss</div>
           <div style={{display:"flex",gap:16}}>
@@ -440,22 +374,102 @@ function Footer({onAuth}){
   );
 }
 
-// ── BADGE & CARD ──────────────────────────────────────────────────────────────
 function Badge({children,color=T.accent}){
   return <span style={{background:color+"22",color,border:`1px solid ${color}44`,borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:700,letterSpacing:1}}>{children}</span>;
 }
+
 function Card({children,style={},onClick}){
   return <div onClick={onClick} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:16,...style}}>{children}</div>;
 }
 
-// ── MAIN ──────────────────────────────────────────────────────────────────────
+function Dashboard({user,onBack}){
+  const [portfolio,setPortfolio]=useState(null);
+
+  useEffect(()=>{
+    fetch("/api/portfolio").then(r=>r.json()).then(d=>setPortfolio(d.portfolio));
+  },[]);
+
+  return(
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"24px"}}>
+      <button onClick={onBack} style={{background:"none",border:`1px solid ${T.border}`,color:T.accent,padding:"6px 12px",borderRadius:8,marginBottom:24,cursor:"pointer",fontFamily:T.font}}>← Back to Markets</button>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16,marginBottom:32}}>
+        <Card>
+          <div style={{fontSize:12,color:T.sub,marginBottom:6}}>Account</div>
+          <div style={{fontSize:18,fontWeight:800,color:T.text}}>{user?.name}</div>
+          <div style={{fontSize:13,color:T.accent,marginTop:6}}>{user?.plan} Plan</div>
+        </Card>
+        <Card>
+          <div style={{fontSize:12,color:T.sub,marginBottom:6}}>Total Value</div>
+          <div style={{fontSize:24,fontWeight:800,color:T.green}}>$45,832</div>
+          <div style={{fontSize:12,color:T.green,marginTop:4}}>+$3,516 (8.31%)</div>
+        </Card>
+        <Card>
+          <div style={{fontSize:12,color:T.sub,marginBottom:6}}>Total Invested</div>
+          <div style={{fontSize:18,fontWeight:800}}>$42,316</div>
+          <div style={{fontSize:11,color:T.sub,marginTop:4}}>5 positions</div>
+        </Card>
+      </div>
+
+      <Card style={{marginBottom:24}}>
+        <div style={{fontSize:16,fontWeight:800,marginBottom:16}}>Portfolio Positions</div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+            <thead>
+              <tr style={{borderBottom:`1px solid ${T.border}`}}>
+                <th style={{textAlign:"left",padding:"8px 0",color:T.sub,fontWeight:600}}>Symbol</th>
+                <th style={{textAlign:"right",padding:"8px 0",color:T.sub,fontWeight:600}}>Qty</th>
+                <th style={{textAlign:"right",padding:"8px 0",color:T.sub,fontWeight:600}}>Avg</th>
+                <th style={{textAlign:"right",padding:"8px 0",color:T.sub,fontWeight:600}}>Current</th>
+                <th style={{textAlign:"right",padding:"8px 0",color:T.sub,fontWeight:600}}>Gain</th>
+              </tr>
+            </thead>
+            <tbody>
+              {portfolio?.map(pos=>(
+                <tr key={pos.symbol} style={{borderBottom:`1px solid ${T.border}`,color:T.text}}>
+                  <td style={{padding:"12px 0"}}><strong>{pos.symbol}</strong></td>
+                  <td style={{textAlign:"right",padding:"12px 0"}}>{pos.qty}</td>
+                  <td style={{textAlign:"right",padding:"12px 0"}}>${fmt(pos.avg)}</td>
+                  <td style={{textAlign:"right",padding:"12px 0",color:T.green}}>${fmt(pos.current)}</td>
+                  <td style={{textAlign:"right",padding:"12px 0",color:T.green}}>${fmt(pos.gain)} ({pos.pct}%)</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function About({onBack}){
+  return(
+    <div style={{maxWidth:900,margin:"0 auto",padding:"40px 24px"}}>
+      <button onClick={onBack} style={{background:"none",border:`1px solid ${T.border}`,color:T.accent,padding:"6px 12px",borderRadius:8,marginBottom:24,cursor:"pointer",fontFamily:T.font}}>← Back</button>
+      <h1 style={{fontSize:40,fontWeight:800,marginBottom:24}}>About FXARO</h1>
+      <p style={{fontSize:16,color:T.sub,lineHeight:1.8,marginBottom:16}}>FXARO is the leading AI-powered trading platform designed for professional and retail traders. We leverage cutting-edge artificial intelligence to deliver real-time trading signals across multiple asset classes.</p>
+      <p style={{fontSize:16,color:T.sub,lineHeight:1.8,marginBottom:16}}>Founded in 2024, our mission is to democratize professional trading by making AI-driven insights accessible to everyone. Our platform analyzes millions of data points every second to identify profitable trading opportunities.</p>
+      <h2 style={{fontSize:24,fontWeight:800,marginTop:32,marginBottom:16}}>Our Features</h2>
+      <ul style={{fontSize:15,color:T.sub,lineHeight:2}}>
+        <li>✓ AI-powered trading signals across 5 major markets</li>
+        <li>✓ Real-time portfolio tracking and management</li>
+        <li>✓ Advanced technical analysis tools</li>
+        <li>✓ News sentiment analysis</li>
+        <li>✓ Professional-grade API for algorithmic trading</li>
+      </ul>
+    </div>
+  );
+}
+
 export default function FXARO(){
+  const [page,setPage]=useState("home");
   const [tab,setTab]=useState("Markets");
   const [market,setMarket]=useState("NASDAQ");
   const [selected,setSelected]=useState(MARKETS.NASDAQ[0]);
   const [candleData,setCandleData]=useState({});
   const [newsFilter,setNewsFilter]=useState("All");
   const [authModal,setAuthModal]=useState(null);
+  const [user,setUser]=useState(null);
   const [prices,setPrices]=useState(()=>{
     const p={};
     Object.values(MARKETS).flat().forEach(i=>{p[i.symbol]=i.price;});
@@ -475,6 +489,11 @@ export default function FXARO(){
     {symbol:"EUR/USD",qty:10000,avg:1.0791, market:"Forex" },
   ]);
   const chatEnd=useRef(null);
+
+  useEffect(()=>{
+    const user=localStorage.getItem("user");
+    if(user) setUser(JSON.parse(user));
+  },[]);
 
   useEffect(()=>{
     const cd={};
@@ -502,286 +521,172 @@ export default function FXARO(){
   useEffect(()=>{chatEnd.current?.scrollIntoView({behavior:"smooth"});},[messages]);
 
   const sendMessage=async()=>{
-    if(!input.trim()||loading)return;
-    const userMsg={role:"user",content:input};
-    const newMsgs=[...messages,userMsg];
-    setMessages(newMsgs);setInput("");setLoading(true);
-    try{
+    if(!input.trim()||loading) return;
+    const msg=input;
+    setInput("");
+    setMessages(prev=>[...prev,{role:"user",content:msg}]);
+    setLoading(true);
+
+    try {
       const res=await fetch("/api/chat",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          messages:newMsgs.map(m=>({role:m.role,content:m.content})),
-          system:"You are FXARO AI, a professional trading assistant for FXARO (fxaro.com). You cover NASDAQ stocks, Gold/precious metals, Crypto, Forex, and Commodities. Signals: 🟢 BUY 🔴 SELL 🟡 HOLD. Be concise (2-4 sentences). Always include a signal. Mention price levels. Add a brief risk note. Never promise guaranteed profits."
-        })
+        body:JSON.stringify({messages:[{role:"user",content:msg}],system:"You are FXARO AI, a professional trading assistant covering NASDAQ, Gold, Crypto, Forex, Commodities. Signals: 🟢 BUY 🔴 SELL 🟡 HOLD. Be concise (2-4 sentences). Always include a signal. Mention price levels. Add a brief risk note."})
       });
       const data=await res.json();
-      setMessages(prev=>[...prev,{role:"assistant",content:data.content||"⚠️ Error. Please retry."}]);
-    }catch{
-      setMessages(prev=>[...prev,{role:"assistant",content:"⚠️ Connection error. Please retry."}]);
+      setMessages(prev=>[...prev,{role:"assistant",content:data.content||"Unable to fetch response"}]);
+    } catch(err){
+      setMessages(prev=>[...prev,{role:"assistant",content:"⚠️ Connection error. Please try again."}]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const currentPrice=prices[selected?.symbol]||selected?.price||0;
-  const currentCandles=candleData[selected?.symbol]||[];
-  const firstClose=currentCandles[0]?.close||currentPrice;
-  const isUp=currentPrice>=firstClose;
-  const TABS=["Markets","AI Bot","Portfolio","News","Pricing"];
-  const filteredNews=newsFilter==="All"?NEWS:NEWS.filter(n=>n.tag===newsFilter.toUpperCase()||n.tag.includes(newsFilter.toUpperCase()));
+  if(page==="dashboard") return <Dashboard user={user} onBack={()=>setPage("home")}/>;
+  if(page==="about") return <About onBack={()=>setPage("home")}/>;
 
   return(
-    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text,fontSize:14}}>
-      {authModal&&<AuthModal mode={authModal} onClose={()=>setAuthModal(null)}/>}
+    <div style={{background:T.bg,color:T.text,minHeight:"100vh",fontFamily:T.font}}>
+      {authModal&&<AuthModal mode={authModal} onClose={()=>setAuthModal(null)} onSuccess={(u)=>{setUser(u);setAuthModal(null);}}/>}
+      <TickerBar prices={prices}/>
+      <HeaderChart prices={prices} candleData={candleData}/>
 
-      {/* NAV */}
       <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",alignItems:"center",gap:0,position:"sticky",top:0,zIndex:100}}>
-        <a href="https://fxaro.com" target="_blank" rel="noopener noreferrer" style={{textDecoration:"none",marginRight:32,padding:"12px 0",display:"flex",flexDirection:"column",cursor:"pointer"}}>
-          <span style={{fontSize:21,fontWeight:900,color:T.accent,letterSpacing:-0.5,lineHeight:1}}>
-            FX<span style={{color:T.text}}>ARO</span>
-          </span>
+        <div onClick={()=>setPage("home")} style={{cursor:"pointer",textDecoration:"none",marginRight:32,padding:"12px 0",display:"flex",flexDirection:"column"}}>
+          <span style={{fontSize:21,fontWeight:900,color:T.accent,letterSpacing:-0.5}}>FX<span style={{color:T.text}}>ARO</span></span>
           <span style={{fontSize:9,color:T.sub,letterSpacing:3,fontWeight:400}}>AI TRADING</span>
-        </a>
+        </div>
         <div style={{display:"flex",gap:2,flex:1}}>
-          {TABS.map(t=>(
-            <button key={t} onClick={()=>setTab(t)} style={{
-              background:tab===t?T.accentGlow:"transparent",
-              border:"none",borderBottom:tab===t?`2px solid ${T.accent}`:"2px solid transparent",
-              color:tab===t?T.accent:T.sub,padding:"13px 15px",cursor:"pointer",
-              fontSize:13,fontWeight:tab===t?600:400,fontFamily:T.font,transition:"all 0.2s",
-            }}>{t}</button>
+          {["Markets","Chat","Portfolio","Pricing"].map(t=>(
+            <button key={t} onClick={()=>{setPage("home");setTab(t);}} style={{background:tab===t?T.accentGlow:"none",borderBottom:tab===t?`2px solid ${T.accent}`:"none",color:tab===t?T.accent:T.sub,padding:"13px 15px",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:T.font,border:"none"}}>
+              {t}
+            </button>
           ))}
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button onClick={()=>setAuthModal("login")} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,borderRadius:8,padding:"7px 16px",fontSize:13,cursor:"pointer",fontFamily:T.font}}>Sign In</button>
-          <button onClick={()=>setAuthModal("register")} style={{background:T.accent,border:"none",color:"#fff",borderRadius:8,padding:"7px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:T.font}}>Register Free</button>
+        <div style={{display:"flex",gap:8}}>
+          {user?(
+            <>
+              <div style={{color:T.accent,fontSize:13,fontWeight:600,padding:"8px 12px"}}>{user.name}</div>
+              <button onClick={()=>{localStorage.clear();setUser(null);}} style={{background:T.red,border:"none",color:"#fff",borderRadius:6,padding:"6px 14px",fontSize:12,cursor:"pointer",fontFamily:T.font,fontWeight:600}}>Logout</button>
+            </>
+          ):(
+            <>
+              <button onClick={()=>setAuthModal("login")} style={{background:"none",border:`1px solid ${T.border}`,color:T.sub,borderRadius:6,padding:"6px 14px",fontSize:12,cursor:"pointer",fontFamily:T.font}}>Sign In</button>
+              <button onClick={()=>setAuthModal("register")} style={{background:T.accent,border:"none",color:"#fff",borderRadius:6,padding:"6px 14px",fontSize:12,cursor:"pointer",fontFamily:T.font,fontWeight:600}}>Register</button>
+            </>
+          )}
         </div>
       </nav>
 
-      {/* LIVE TICKER */}
-      <TickerBar prices={prices}/>
-
-      {/* HEADER CHARTS */}
-      <HeaderChart prices={prices} candleData={candleData}/>
-
-      <div style={{padding:"20px 24px",maxWidth:1200,margin:"0 auto"}}>
-
-        {/* ── MARKETS ── */}
+      <div style={{padding:"24px",maxWidth:1200,margin:"0 auto",minHeight:"calc(100vh - 300px)"}}>
         {tab==="Markets"&&(
-          <div style={{display:"grid",gridTemplateColumns:"290px 1fr",gap:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:20}}>
             <div>
-              <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
-                {Object.keys(MARKETS).map(m=>(
-                  <button key={m} onClick={()=>{setMarket(m);setSelected(MARKETS[m][0]);}} style={{
-                    background:market===m?(mktColor[m]||T.accent)+"22":"transparent",
-                    color:market===m?(mktColor[m]||T.accent):T.sub,
-                    border:`1px solid ${market===m?(mktColor[m]||T.accent):T.border}`,
-                    borderRadius:6,padding:"4px 11px",cursor:"pointer",fontSize:11,fontWeight:600,fontFamily:T.font,
-                  }}>{m}</button>
-                ))}
-              </div>
-              <Card style={{padding:0,overflow:"hidden"}}>
-                {MARKETS[market].map((item,i)=>{
-                  const p=prices[item.symbol]||item.price;
-                  const up=item.change>=0;
-                  const active=selected?.symbol===item.symbol;
-                  const mc=mktColor[market]||T.accent;
-                  const spark=candleData[item.symbol+"_spark"]||[];
-                  return(
-                    <div key={item.symbol} onClick={()=>setSelected(item)} style={{
-                      padding:"10px 14px",cursor:"pointer",
-                      background:active?mc+"14":"transparent",
-                      borderLeft:`3px solid ${active?mc:"transparent"}`,
-                      borderBottom:i<MARKETS[market].length-1?`1px solid ${T.border}`:"none",
-                      display:"flex",alignItems:"center",gap:8,
-                    }}>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{display:"flex",justifyContent:"space-between"}}>
-                          <span style={{fontWeight:700,fontFamily:T.mono,fontSize:12,color:active?mc:T.text}}>{item.symbol}</span>
-                          <span style={{color:up?T.green:T.red,fontSize:11,fontWeight:600}}>{up?"+":""}{item.change}%</span>
-                        </div>
-                        <div style={{color:T.sub,fontSize:10,marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.name}</div>
-                        <div style={{fontFamily:T.mono,fontSize:13,marginTop:3,fontWeight:600}}>{fmt(p)}</div>
-                      </div>
-                      <CandleSpark candles={spark}/>
-                    </div>
-                  );
-                })}
-              </Card>
+              <div style={{fontSize:12,fontWeight:700,color:T.sub,letterSpacing:1,marginBottom:12}}>MARKETS</div>
+              {Object.keys(MARKETS).map(m=>(
+                <button key={m} onClick={()=>{setMarket(m);setSelected(MARKETS[m][0]);}} style={{width:"100%",background:market===m?T.accent:T.card,color:market===m?"#fff":T.text,border:`1px solid ${market===m?T.accent:T.border}`,borderRadius:8,padding:"10px",marginBottom:8,cursor:"pointer",fontWeight:600,fontSize:13,fontFamily:T.font}}>
+                  {m}
+                </button>
+              ))}
             </div>
-
-            {/* Main chart */}
             <div>
-              <Card style={{marginBottom:12,padding:"14px 14px 8px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                  <div>
-                    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
-                      <Badge color={mktColor[market]||T.accent}>{market}</Badge>
-                      <span style={{color:T.sub,fontSize:12}}>{selected?.name}</span>
-                    </div>
-                    <div style={{fontSize:22,fontWeight:800}}>{selected?.symbol}</div>
-                  </div>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:28,fontWeight:800,fontFamily:T.mono,color:mktColor[market]||T.accent}}>{fmt(currentPrice)}</div>
-                    <div style={{color:isUp?T.green:T.red,fontWeight:700}}>
-                      {isUp?"▲":"▼"} {Math.abs(((currentPrice-firstClose)/firstClose)*100).toFixed(2)}%
-                    </div>
-                  </div>
-                </div>
-                {/* Toolbar */}
-                <div style={{display:"flex",gap:6,marginBottom:8}}>
-                  {["1m","5m","15m","1H","4H","1D","1W"].map(tf=>(
-                    <button key={tf} style={{background:tf==="1H"?T.accent+"22":"transparent",color:tf==="1H"?T.accent:T.sub,border:`1px solid ${tf==="1H"?T.accent:T.border}`,borderRadius:4,padding:"3px 9px",fontSize:11,cursor:"pointer",fontFamily:T.font}}>{tf}</button>
-                  ))}
-                  <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-                    {["📊","〰️","🕯️"].map((ic,i)=>(
-                      <button key={i} style={{background:i===2?T.accent+"22":"transparent",border:`1px solid ${i===2?T.accent:T.border}`,borderRadius:4,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>{ic}</button>
-                    ))}
-                  </div>
-                </div>
-                <CandleChart candles={currentCandles} height={280} color={mktColor[market]||T.accent}/>
-              </Card>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
-                {[
-                  {label:"OPEN",  value:fmt(currentCandles[currentCandles.length-1]?.open||currentPrice)},
-                  {label:"HIGH",  value:fmt(currentPrice*1.012)},
-                  {label:"LOW",   value:fmt(currentPrice*0.988)},
-                  {label:"RSI",   value:(44+Math.random()*22).toFixed(1)},
-                  {label:"VOL",   value:"$"+(Math.random()*700+120).toFixed(0)+"M"},
-                ].map(s=>(
-                  <Card key={s.label} style={{padding:"9px 12px"}}>
-                    <div style={{fontSize:9,color:T.sub,letterSpacing:1}}>{s.label}</div>
-                    <div style={{fontFamily:T.mono,fontWeight:700,marginTop:3,fontSize:13}}>{s.value}</div>
-                  </Card>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:20}}>
+                {MARKETS[market].map(s=>(
+                  <button key={s.symbol} onClick={()=>setSelected(s)} style={{background:selected.symbol===s.symbol?T.accentGlow:T.card,border:`1px solid ${selected.symbol===s.symbol?T.accent:T.border}`,borderRadius:8,padding:12,cursor:"pointer",textAlign:"left"}}>
+                    <div style={{fontWeight:700,color:selected.symbol===s.symbol?T.accent:T.text}}>{s.symbol}</div>
+                    <div style={{fontSize:12,color:T.sub}}>{s.name}</div>
+                    <div style={{fontSize:14,fontWeight:800,color:T.text,marginTop:4}}>${fmt(prices[s.symbol]||s.price)}</div>
+                    <div style={{fontSize:11,color:s.change>=0?T.green:T.red}}>{s.change>=0?"▲":"▼"} {Math.abs(s.change).toFixed(2)}%</div>
+                  </button>
                 ))}
               </div>
+              <Card>
+                <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>{selected.name}</div>
+                <div style={{height:150}}>
+                  <CandleChart candles={candleData[selected.symbol]||[]} W={300} H={150}/>
+                </div>
+              </Card>
             </div>
           </div>
         )}
 
-        {/* ── AI BOT ── */}
-        {tab==="AI Bot"&&(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 270px",gap:16}}>
-            <Card style={{padding:0,overflow:"hidden",display:"flex",flexDirection:"column",height:580}}>
-              <div style={{padding:"12px 20px",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:9,height:9,background:T.green,borderRadius:"50%",boxShadow:`0 0 8px ${T.green}`}}/>
-                <span style={{fontWeight:700}}>FXARO AI</span>
-                <Badge>CLAUDE POWERED</Badge>
-                <span style={{color:T.sub,fontSize:11,marginLeft:"auto"}}>NASDAQ · Gold · Crypto · Forex</span>
-              </div>
-              <div style={{flex:1,overflowY:"auto",padding:16,display:"flex",flexDirection:"column",gap:12}}>
+        {tab==="Chat"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:20,height:"600px"}}>
+            <Card style={{display:"flex",flexDirection:"column"}}>
+              <div style={{fontSize:12,fontWeight:700,color:T.sub,letterSpacing:1,marginBottom:8}}>FEATURED</div>
+              {[selected,...Object.values(MARKETS).flat().slice(0,3)].map(s=>(
+                <button key={s.symbol} onClick={()=>{}} style={{background:"none",border:"none",textAlign:"left",padding:8,color:T.text,cursor:"pointer",fontSize:13,marginBottom:8,borderBottom:`1px solid ${T.border}`}}>
+                  <div style={{fontWeight:600}}>{s.symbol}</div>
+                  <div style={{fontSize:11,color:T.sub}}>${fmt(prices[s.symbol]||s.price)}</div>
+                </button>
+              ))}
+            </Card>
+            <Card style={{display:"flex",flexDirection:"column"}}>
+              <div style={{overflowY:"auto",flex:1,marginBottom:12}}>
                 {messages.map((m,i)=>(
-                  <div key={i} style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"82%"}}>
-                    <div style={{background:m.role==="user"?T.accent:T.surface,border:`1px solid ${m.role==="user"?T.accent+"66":T.border}`,borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",padding:"10px 14px",fontSize:13,lineHeight:1.65,color:m.role==="user"?"#fff":T.text,whiteSpace:"pre-wrap"}}>{m.content}</div>
+                  <div key={i} style={{marginBottom:12,textAlign:m.role==="user"?"right":"left"}}>
+                    <div style={{display:"inline-block",background:m.role==="user"?T.accent:T.surface,color:"#fff",borderRadius:8,padding:"10px 14px",maxWidth:"80%",fontSize:13,lineHeight:1.5}}>
+                      {m.content}
+                    </div>
                   </div>
                 ))}
-                {loading&&<div style={{alignSelf:"flex-start"}}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:"12px 12px 12px 2px",padding:"10px 14px",color:T.sub,fontSize:13}}>⠋ Analysing markets...</div></div>}
+                {loading&&<div style={{color:T.sub}}>🤖 Thinking...</div>}
                 <div ref={chatEnd}/>
               </div>
-              <div style={{padding:12,borderTop:`1px solid ${T.border}`}}>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:10}}>
-                  {["NVDA signal?","Gold vs inflation?","BTC resistance levels?","EUR/USD outlook","Best NASDAQ pick?"].map(p=>(
-                    <button key={p} onClick={()=>setInput(p)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:20,padding:"4px 10px",fontSize:11,color:T.sub,cursor:"pointer",fontFamily:T.font}}>{p}</button>
-                  ))}
-                </div>
-                <div style={{display:"flex",gap:8}}>
-                  <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendMessage()}
-                    placeholder="Ask about NASDAQ, Gold, Crypto, Forex..."
-                    style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 14px",fontSize:13,color:T.text,outline:"none",fontFamily:T.font}}/>
-                  <button onClick={sendMessage} disabled={loading||!input.trim()} style={{background:loading?T.muted:T.accent,border:"none",borderRadius:8,padding:"10px 20px",fontSize:13,fontWeight:600,color:"#fff",cursor:loading?"not-allowed":"pointer",fontFamily:T.font}}>Send</button>
-                </div>
-              </div>
+              <form onSubmit={e=>{e.preventDefault();sendMessage();}} style={{display:"flex",gap:8}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask about markets..." disabled={loading} style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,outline:"none",fontSize:13,fontFamily:T.font}}/>
+                <button type="submit" disabled={loading} style={{background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"10px 16px",fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:T.font}}>→</button>
+              </form>
             </Card>
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              <Card>
-                <div style={{fontWeight:700,marginBottom:10,fontSize:13}}>⚡ AI Signals</div>
-                {[{symbol:"NVDA",signal:"BUY",conf:84,color:T.accent},{symbol:"XAU/USD",signal:"BUY",conf:79,color:T.gold},{symbol:"BTC",signal:"BUY",conf:76,color:T.purple},{symbol:"EUR/USD",signal:"HOLD",conf:58,color:T.green},{symbol:"TSLA",signal:"SELL",conf:68,color:T.accent},{symbol:"ETH",signal:"BUY",conf:72,color:T.purple},{symbol:"WTI",signal:"HOLD",conf:55,color:"#fb923c"}].map(s=>(
-                  <div key={s.symbol} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${T.border}`}}>
-                    <span style={{fontFamily:T.mono,fontSize:12,fontWeight:600,color:s.color}}>{s.symbol}</span>
-                    <Badge color={s.signal==="BUY"?T.green:s.signal==="SELL"?T.red:T.yellow}>{s.signal}</Badge>
-                    <span style={{color:T.sub,fontSize:11}}>{s.conf}%</span>
-                  </div>
-                ))}
-              </Card>
-              <Card>
-                <div style={{fontWeight:700,marginBottom:8,fontSize:13}}>🌍 Market Status</div>
-                {[["NASDAQ",true],["Gold Spot",true],["Crypto 24/7",true],["Forex",true],["Commodities",true]].map(([m,open])=>(
-                  <div key={m} style={{display:"flex",justifyContent:"space-between",padding:"5px 0"}}>
-                    <span style={{fontSize:12,color:T.sub}}>{m}</span>
-                    <span style={{fontSize:11,color:open?T.green:T.red,fontWeight:600}}>{open?"● OPEN":"● CLOSED"}</span>
-                  </div>
-                ))}
-              </Card>
-            </div>
           </div>
         )}
 
-        {/* ── PORTFOLIO ── */}
         {tab==="Portfolio"&&(
           <div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
-              {[{label:"Portfolio Value",value:"$156,241",change:"+$4,812 today",up:true},{label:"Total P&L",value:"+$22,841",change:"+17.1% all time",up:true},{label:"Open Positions",value:"5",change:"NASDAQ · Gold · Crypto · Forex",up:null}].map(s=>(
-                <Card key={s.label}>
-                  <div style={{color:T.sub,fontSize:10,letterSpacing:1}}>{s.label.toUpperCase()}</div>
-                  <div style={{fontSize:26,fontWeight:800,marginTop:4,color:s.up===true?T.green:s.up===false?T.red:T.text}}>{s.value}</div>
-                  <div style={{color:s.up===true?T.green:s.up===false?T.red:T.sub,fontSize:12,marginTop:2}}>{s.change}</div>
+            <div style={{fontSize:20,fontWeight:800,marginBottom:16}}>Your Portfolio</div>
+            {user?(
+              <div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+                  <Card><div style={{fontSize:11,color:T.sub}}>Total Value</div><div style={{fontSize:24,fontWeight:800,color:T.green}}>$45.8K</div></Card>
+                  <Card><div style={{fontSize:11,color:T.sub}}>Total Gain</div><div style={{fontSize:20,fontWeight:800,color:T.green}}>+$3.5K</div></Card>
+                  <Card><div style={{fontSize:11,color:T.sub}}>Positions</div><div style={{fontSize:24,fontWeight:800}}>5</div></Card>
+                </div>
+                <Card>
+                  <div style={{overflowX:"auto"}}>
+                    <table style={{width:"100%",fontSize:13}}>
+                      <thead>
+                        <tr style={{borderBottom:`1px solid ${T.border}`,color:T.sub}}>
+                          <th style={{textAlign:"left",padding:8}}>Symbol</th>
+                          <th style={{textAlign:"right",padding:8}}>Qty</th>
+                          <th style={{textAlign:"right",padding:8}}>Avg</th>
+                          <th style={{textAlign:"right",padding:8}}>Current</th>
+                          <th style={{textAlign:"right",padding:8}}>Gain</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {portfolio.map(p=>(
+                          <tr key={p.symbol} style={{borderBottom:`1px solid ${T.border}`}}>
+                            <td style={{padding:8}}><strong>{p.symbol}</strong></td>
+                            <td style={{textAlign:"right",padding:8}}>{p.qty}</td>
+                            <td style={{textAlign:"right",padding:8}}>${fmt(p.avg)}</td>
+                            <td style={{textAlign:"right",padding:8,color:T.green}}>${fmt(prices[p.symbol]||100)}</td>
+                            <td style={{textAlign:"right",padding:8,color:T.green}}>+8.1%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </Card>
-              ))}
-            </div>
-            <Card>
-              <div style={{fontWeight:700,marginBottom:14}}>Open Positions</div>
-              <div style={{display:"grid",gridTemplateColumns:"1.2fr 0.7fr 1fr 1fr 0.8fr 0.8fr",gap:0}}>
-                {["Symbol","Qty","Avg Price","Current","P&L","Signal"].map(h=>(
-                  <div key={h} style={{color:T.sub,fontSize:10,letterSpacing:1,padding:"6px 0",borderBottom:`1px solid ${T.border}`}}>{h.toUpperCase()}</div>
-                ))}
-                {portfolio.map((pos,idx)=>{
-                  const cur=prices[pos.symbol]||pos.avg;
-                  const pnl=((cur-pos.avg)/pos.avg*100).toFixed(2);
-                  const up=parseFloat(pnl)>=0;
-                  const sigs=["BUY","BUY","BUY","HOLD","HOLD"];
-                  const sig=sigs[idx];
-                  const mc=mktColor[pos.market]||T.accent;
-                  return[
-                    <div key={pos.symbol+"s"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`,fontFamily:T.mono,fontWeight:700,color:mc,display:"flex",alignItems:"center",gap:6}}>{pos.symbol}</div>,
-                    <div key={pos.symbol+"q"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`,color:T.sub,fontFamily:T.mono,fontSize:12}}>{pos.qty}</div>,
-                    <div key={pos.symbol+"a"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`,fontFamily:T.mono,fontSize:12}}>{fmt(pos.avg)}</div>,
-                    <div key={pos.symbol+"c"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`,fontFamily:T.mono,fontSize:12,color:T.accent}}>{fmt(cur)}</div>,
-                    <div key={pos.symbol+"p"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`,color:up?T.green:T.red,fontWeight:600,fontSize:12}}>{up?"+":""}{pnl}%</div>,
-                    <div key={pos.symbol+"sig"} style={{padding:"11px 0",borderBottom:`1px solid ${T.border}`}}><Badge color={sig==="BUY"?T.green:sig==="SELL"?T.red:T.yellow}>{sig}</Badge></div>,
-                  ];
-                })}
               </div>
-            </Card>
+            ):(
+              <Card style={{textAlign:"center",padding:40}}>
+                <div style={{fontSize:16,marginBottom:16}}>Sign in to view your portfolio</div>
+                <button onClick={()=>setAuthModal("login")} style={{background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:"10px 24px",fontWeight:700,cursor:"pointer",fontFamily:T.font}}>Sign In Now →</button>
+              </Card>
+            )}
           </div>
         )}
 
-        {/* ── NEWS ── */}
-        {tab==="News"&&(
-          <div>
-            <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
-              {["All","NASDAQ","Gold","Crypto","Forex","Commodities"].map(f=>(
-                <button key={f} onClick={()=>setNewsFilter(f)} style={{background:newsFilter===f?T.accent:T.card,color:newsFilter===f?"#fff":T.sub,border:`1px solid ${newsFilter===f?T.accent:T.border}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",fontSize:12,fontFamily:T.font}}>{f}</button>
-              ))}
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {NEWS.map((n,i)=>{
-                const sc=n.sentiment==="bullish"?T.green:n.sentiment==="bearish"?T.red:T.yellow;
-                return(
-                  <Card key={i} style={{display:"flex",gap:14,alignItems:"center"}}>
-                    <Badge color={mktColor[n.tag]||T.accent}>{n.tag}</Badge>
-                    <div style={{flex:1}}>
-                      <div style={{fontWeight:600,marginBottom:2,fontSize:13}}>{n.headline}</div>
-                      <div style={{color:T.muted,fontSize:11}}>{n.time}</div>
-                    </div>
-                    <div style={{fontSize:11,fontWeight:700,color:sc,background:sc+"18",padding:"4px 10px",borderRadius:20,whiteSpace:"nowrap"}}>{n.sentiment.toUpperCase()}</div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── PRICING ── */}
         {tab==="Pricing"&&(
           <div style={{maxWidth:820,margin:"0 auto"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
@@ -790,39 +695,26 @@ export default function FXARO(){
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
               {PLANS.map(plan=>(
-                <div key={plan.name} style={{background:plan.popular?`linear-gradient(135deg,${T.accent}22,${T.purple}11)`:T.card,border:`1px solid ${plan.popular?T.accent:T.border}`,borderRadius:16,padding:24,position:"relative"}}>
+                <Card key={plan.name} style={{background:plan.popular?`linear-gradient(135deg,${T.accent}22,${T.purple}11)`:T.card,border:`1px solid ${plan.popular?T.accent:T.border}`,position:"relative"}}>
                   {plan.popular&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:T.accent,color:"#fff",borderRadius:20,padding:"3px 14px",fontSize:11,fontWeight:700}}>MOST POPULAR</div>}
                   <div style={{fontSize:16,fontWeight:700,marginBottom:4}}>{plan.name}</div>
-                  <div style={{marginBottom:16}}>
-                    <span style={{fontSize:32,fontWeight:800,color:plan.color}}>{plan.price}</span>
-                    <span style={{color:T.sub,fontSize:13}}>{plan.period}</span>
-                  </div>
+                  <div style={{marginBottom:16}}><span style={{fontSize:32,fontWeight:800,color:plan.color}}>{plan.price}</span><span style={{color:T.sub,fontSize:13}}>{plan.period}</span></div>
                   <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
-                    {plan.features.map(f=>(
-                      <div key={f} style={{display:"flex",gap:8,fontSize:13}}>
-                        <span style={{color:T.green}}>✓</span><span style={{color:T.sub}}>{f}</span>
-                      </div>
-                    ))}
+                    {plan.features.map(f=><div key={f} style={{display:"flex",gap:8,fontSize:13}}><span style={{color:T.green}}>✓</span><span style={{color:T.sub}}>{f}</span></div>)}
                   </div>
                   <button onClick={()=>setAuthModal("register")} style={{width:"100%",background:plan.popular?T.accent:"transparent",border:`1px solid ${plan.popular?T.accent:T.border}`,color:plan.popular?"#fff":T.text,borderRadius:8,padding:"10px 0",fontWeight:600,cursor:"pointer",fontSize:14,fontFamily:T.font}}>{plan.cta}</button>
-                </div>
+                </Card>
               ))}
-            </div>
-            <div style={{textAlign:"center",marginTop:24,color:T.sub,fontSize:13}}>
-              🌐 <a href="https://fxaro.com" target="_blank" rel="noopener noreferrer" style={{color:T.accent,fontWeight:700,textDecoration:"none"}}>fxaro.com</a> · Secure payments · 14-day free trial on Pro
             </div>
           </div>
         )}
-
       </div>
 
-      {/* EMAIL SUBSCRIPTION */}
       <div style={{padding:"40px 24px 0",maxWidth:1200,margin:"0 auto"}}>
         <EmailSub/>
       </div>
 
-      {/* FOOTER */}
-      <Footer onAuth={setAuthModal}/>
+      <Footer onAuth={setAuthModal} onPage={setPage}/>
     </div>
   );
 }

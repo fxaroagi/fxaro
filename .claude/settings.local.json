@@ -25,7 +25,28 @@
       "mcp__Claude_in_Chrome__tabs_context_mcp",
       "Bash(rm -rf src dist logs)",
       "Bash(rm tsconfig.json)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Simplify API - remove console logs and add CORS support *)",
+      "Bash(git push *)",
+      "Bash(npx vercel *)",
+      "Bash(git commit *)",
+      "Bash(curl -s \"https://fxaro-five.vercel.app/api/debug\")",
+      "Bash(Start-Sleep -Seconds 4)",
+      "Bash(curl -s http://localhost:3000/api/debug)",
+      "Bash(ConvertFrom-Json)",
+      "Bash(ConvertTo-Json)",
+      "Bash(curl -s -X POST http://localhost:3000/api/chat -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -sk https://fxaro-five.vercel.app/api/debug)",
+      "Bash(curl -sk https://fxaro-five.vercel.app/api/test)",
+      "Bash(curl -sk https://fxaro-five.vercel.app/)",
+      "Bash(curl -sk https://fxaro-five.vercel.app/api/chat -X POST -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\":\"user\",\"content\":\"BTC price outlook?\"}],\"system\":\"You are FXARO AI.\"}')",
+      "Bash(curl -sk https://fxaro-five.vercel.app/api/portfolio)",
+      "Bash(curl -sk -X POST https://fxaro-five.vercel.app/api/auth -H \"Content-Type: application/json\" -d '{\"action\":\"register\",\"name\":\"John\",\"email\":\"test@example.com\",\"password\":\"pass123\"}')",
+      "Bash(curl -sk -X POST https://fxaro-five.vercel.app/api/chat -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\":\"user\",\"content\":\"What is BTC?\"}],\"system\":\"You are FXARO AI\"}')",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(pkill -f \"next dev\")"
     ]
   }
 }
