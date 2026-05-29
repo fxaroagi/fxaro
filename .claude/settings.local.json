@@ -46,7 +46,11 @@
       "Bash(curl -sk -X POST https://fxaro-five.vercel.app/api/chat -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\":\"user\",\"content\":\"What is BTC?\"}],\"system\":\"You are FXARO AI\"}')",
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s http://localhost:3000/)",
-      "Bash(pkill -f \"next dev\")"
+      "Bash(pkill -f \"next dev\")",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(cp /tmp/original.jsx /c/Users/User/.openclaw/components/FXARO.jsx)",
+      "Bash(curl -s \"https://fxaro-five.vercel.app/\")"
     ]
   }
 }

@@ -382,12 +382,12 @@ function EmailSub(){
 }
 
 // ── FOOTER ────────────────────────────────────────────────────────────────────
-function Footer({onAuth,setPage}){
+function Footer({onAuth, setPage}){
   const cols=[
     {title:"Platform",links:[{text:"Markets",page:"home"},{text:"AI Bot",page:"home"},{text:"Portfolio",page:"home"},{text:"News",page:"home"},{text:"Pricing",page:"home"},{text:"API Docs",page:"home"}]},
     {title:"Markets",links:[{text:"NASDAQ",page:"home"},{text:"Gold",page:"home"},{text:"Crypto",page:"home"},{text:"Forex",page:"home"},{text:"Commodities",page:"home"},{text:"Market Hours",page:"home"}]},
-    {title:"Company", links:[{text:"About",page:"about"},{text:"Careers",page:"careers"},{text:"Blog",page:"blog"},{text:"Contact",page:"contact"},{text:"Affiliates",page:"home"},{text:"Press",page:"home"}]},
-    {title:"Legal", links:[{text:"Terms",page:"terms"},{text:"Privacy",page:"privacy"},{text:"Cookies",page:"home"},{text:"Risk",page:"home"},{text:"GDPR",page:"home"},{text:"Compliance",page:"home"}]},
+    {title:"Company",links:[{text:"About",page:"about"},{text:"Blog",page:"blog"},{text:"Careers",page:"careers"},{text:"Contact",page:"contact"},{text:"Affiliates",page:"home"},{text:"Press",page:"home"}]},
+    {title:"Legal",links:[{text:"Terms",page:"terms"},{text:"Privacy",page:"privacy"},{text:"Cookies",page:"home"},{text:"Risk",page:"home"},{text:"GDPR",page:"home"},{text:"Compliance",page:"home"}]},
   ];
   return(
     <footer style={{background:T.surface,borderTop:`1px solid ${T.border}`,padding:"48px 24px 24px"}}>
@@ -395,12 +395,12 @@ function Footer({onAuth,setPage}){
         <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr 1fr",gap:32,marginBottom:40}}>
           {/* Brand col */}
           <div>
-            <div onClick={()=>setPage("home")} style={{textDecoration:"none",cursor:"pointer"}}>
+            <a href="https://fxaro.com" target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
               <div style={{fontSize:26,fontWeight:900,color:T.accent,marginBottom:4,letterSpacing:-0.5}}>
                 FX<span style={{color:T.text}}>ARO</span>
               </div>
               <div style={{fontSize:10,color:T.sub,letterSpacing:3,marginBottom:14}}>AI TRADING PLATFORM</div>
-            </div>
+            </a>
             <div style={{color:T.sub,fontSize:13,lineHeight:1.7,marginBottom:16}}>
               Professional AI-powered trading signals across NASDAQ, Gold, Crypto, Forex and Commodities. Built for serious traders.
             </div>
@@ -417,7 +417,7 @@ function Footer({onAuth,setPage}){
               <div style={{display:"flex",flexDirection:"column",gap:9}}>
                 {col.links.map(link=>(
                   <button key={link.text} onClick={()=>setPage(link.page)}
-                    style={{background:"none",border:"none",color:T.sub,fontSize:13,textDecoration:"none",cursor:"pointer",transition:"color 0.2s",textAlign:"left",fontFamily:T.font,padding:0}}
+                    style={{background:"none",border:"none",color:T.sub,fontSize:13,cursor:"pointer",transition:"color 0.2s",textAlign:"left",fontFamily:T.font,padding:0}}
                     onMouseEnter={e=>e.target.style.color=T.accent}
                     onMouseLeave={e=>e.target.style.color=T.sub}>
                     {link.text}
@@ -446,155 +446,6 @@ function Badge({children,color=T.accent}){
 }
 function Card({children,style={},onClick}){
   return <div onClick={onClick} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:16,...style}}>{children}</div>;
-}
-
-// ── PAGE COMPONENTS ───────────────────────────────────────────────────────────
-function Page({title, children, onBack}) {
-  return(
-    <div style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:T.font}}>
-      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px",display:"flex",alignItems:"center",gap:32}}>
-        <div style={{cursor:"pointer",padding:"12px 0"}} onClick={onBack}>
-          <span style={{fontSize:21,fontWeight:900,color:T.accent}}>FX<span style={{color:T.text}}>ARO</span></span>
-        </div>
-        <button onClick={onBack} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontFamily:T.font}}>← Back</button>
-      </nav>
-      <div style={{maxWidth:1200,margin:"0 auto",padding:"40px 24px"}}>
-        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32}}>{title}</h1>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function AboutPage({onBack}){
-  return(
-    <Page title="About FXARO" onBack={onBack}>
-      <div style={{color:T.sub,lineHeight:1.8,fontSize:16}}>
-        <p style={{marginBottom:20}}>FXARO is a professional AI-powered trading platform designed for traders who demand precision, speed, and intelligence. We combine cutting-edge artificial intelligence with real-time market data to deliver actionable trading signals across multiple asset classes.</p>
-        <h2 style={{fontSize:24,fontWeight:800,color:T.text,marginTop:32,marginBottom:16}}>Our Mission</h2>
-        <p style={{marginBottom:20}}>To democratize professional trading by making AI-driven insights accessible to serious traders worldwide. Every trader deserves access to institutional-grade analysis.</p>
-        <h2 style={{fontSize:24,fontWeight:800,color:T.text,marginTop:32,marginBottom:16}}>Why FXARO</h2>
-        <ul style={{marginBottom:20}}>
-          <li>✓ Real-time AI analysis across 5 major markets</li>
-          <li>✓ Professional-grade candlestick charting</li>
-          <li>✓ Sentiment analysis on breaking news</li>
-          <li>✓ Portfolio tracking with live P&L</li>
-          <li>✓ API access for algorithmic traders</li>
-        </ul>
-      </div>
-    </Page>
-  );
-}
-
-function BlogPage({onBack}){
-  return(
-    <Page title="Blog" onBack={onBack}>
-      <div style={{color:T.sub,lineHeight:1.8}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:24}}>
-          {[
-            {title:"The Rise of AI Trading",date:"May 28, 2026",excerpt:"How artificial intelligence is reshaping modern trading strategies..."},
-            {title:"Bitcoin Halving Analysis",date:"May 27, 2026",excerpt:"What the 2024 halving means for BTC price targets..."},
-            {title:"Gold vs Crypto Correlation",date:"May 26, 2026",excerpt:"Understanding risk management across asset classes..."}
-          ].map((post,i)=>(
-            <div key={i} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:24}}>
-              <div style={{fontSize:14,color:T.accent,marginBottom:8}}>{post.date}</div>
-              <h3 style={{fontSize:18,fontWeight:700,color:T.text,marginBottom:12}}>{post.title}</h3>
-              <p style={{fontSize:14,color:T.sub,marginBottom:16}}>{post.excerpt}</p>
-              <button style={{background:T.accent,color:"#fff",border:"none",borderRadius:6,padding:"8px 16px",cursor:"pointer",fontFamily:T.font,fontWeight:600}}>Read More →</button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Page>
-  );
-}
-
-function CareersPage({onBack}){
-  return(
-    <Page title="Careers at FXARO" onBack={onBack}>
-      <div style={{color:T.sub,lineHeight:1.8,fontSize:16}}>
-        <p style={{marginBottom:24}}>Join our team of trading experts, engineers, and data scientists building the future of AI trading.</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>
-          {[
-            {role:"Senior Backend Engineer",level:"Senior"},
-            {role:"ML Engineer",level:"Mid"},
-            {role:"Full Stack Developer",level:"Mid"},
-            {role:"Data Scientist",level:"Senior"}
-          ].map((job,i)=>(
-            <div key={i} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:20}}>
-              <div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{job.role}</div>
-              <div style={{color:T.accent,fontSize:12,marginBottom:12}}>{job.level}</div>
-              <button style={{background:T.accent,color:"#fff",border:"none",borderRadius:6,padding:"8px 12px",cursor:"pointer",fontFamily:T.font,fontSize:13}}>Apply Now</button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Page>
-  );
-}
-
-function ContactPage({onBack}){
-  return(
-    <Page title="Contact Us" onBack={onBack}>
-      <div style={{maxWidth:600,color:T.sub}}>
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:32}}>
-          <div style={{marginBottom:24}}>
-            <label style={{display:"block",marginBottom:8,fontSize:12,color:T.sub}}>Email</label>
-            <input placeholder="your@email.com" style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:12,color:T.text,fontFamily:T.font,boxSizing:"border-box"}}/>
-          </div>
-          <div style={{marginBottom:24}}>
-            <label style={{display:"block",marginBottom:8,fontSize:12,color:T.sub}}>Message</label>
-            <textarea placeholder="How can we help?" rows="6" style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:12,color:T.text,fontFamily:T.font,boxSizing:"border-box"}}/>
-          </div>
-          <button style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:12,cursor:"pointer",fontFamily:T.font,fontWeight:700}}>Send Message</button>
-        </div>
-        <div style={{marginTop:40,display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:20}}>
-          <div>
-            <div style={{fontWeight:700,marginBottom:8}}>Email</div>
-            <div style={{color:T.accent}}>support@fxaro.com</div>
-          </div>
-          <div>
-            <div style={{fontWeight:700,marginBottom:8}}>Response Time</div>
-            <div style={{color:T.sub}}>Within 24 hours</div>
-          </div>
-        </div>
-      </div>
-    </Page>
-  );
-}
-
-function TermsPage({onBack}){
-  return(
-    <Page title="Terms of Service" onBack={onBack}>
-      <div style={{color:T.sub,lineHeight:1.8,fontSize:14,maxWidth:800}}>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>1. Agreement to Terms</h2>
-        <p style={{marginBottom:16}}>By accessing FXARO, you agree to be bound by these terms and all applicable laws and regulations.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>2. Use License</h2>
-        <p style={{marginBottom:16}}>Permission is granted to temporarily download one copy of materials for personal, non-commercial transitory viewing only.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>3. Disclaimer</h2>
-        <p style={{marginBottom:16}}>The materials on FXARO's website are provided on an 'as is' basis. FXARO makes no warranties, expressed or implied, and disclaims all other warranties.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>4. Limitations</h2>
-        <p style={{marginBottom:16}}>In no event shall FXARO or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption).</p>
-      </div>
-    </Page>
-  );
-}
-
-function PrivacyPage({onBack}){
-  return(
-    <Page title="Privacy Policy" onBack={onBack}>
-      <div style={{color:T.sub,lineHeight:1.8,fontSize:14,maxWidth:800}}>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Data Collection</h2>
-        <p style={{marginBottom:16}}>We collect information you provide directly to us, such as when you create an account or contact us for support.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>How We Use Your Data</h2>
-        <p style={{marginBottom:16}}>Your information is used to provide, maintain, and improve our services, process transactions, and send you updates.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Data Security</h2>
-        <p style={{marginBottom:16}}>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access.</p>
-        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Your Rights</h2>
-        <p style={{marginBottom:16}}>You have the right to access, correct, or delete your personal information. Contact us for any privacy-related concerns.</p>
-      </div>
-    </Page>
-  );
 }
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
@@ -680,12 +531,112 @@ export default function FXARO(){
   const TABS=["Markets","AI Bot","Portfolio","News","Pricing"];
   const filteredNews=newsFilter==="All"?NEWS:NEWS.filter(n=>n.tag===newsFilter.toUpperCase()||n.tag.includes(newsFilter.toUpperCase()));
 
-  if(page==="about") return <AboutPage onBack={()=>setPage("home")}/>;
-  if(page==="blog") return <BlogPage onBack={()=>setPage("home")}/>;
-  if(page==="careers") return <CareersPage onBack={()=>setPage("home")}/>;
-  if(page==="contact") return <ContactPage onBack={()=>setPage("home")}/>;
-  if(page==="terms") return <TermsPage onBack={()=>setPage("home")}/>;
-  if(page==="privacy") return <PrivacyPage onBack={()=>setPage("home")}/>;
+  // Page rendering
+  if(page==="about") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"40px 24px"}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32}}>About FXARO</h1>
+        <div style={{color:T.sub,lineHeight:1.8,fontSize:16}}>
+          <p style={{marginBottom:20}}>FXARO is a professional AI-powered trading platform designed for traders who demand precision, speed, and intelligence.</p>
+          <h2 style={{fontSize:24,fontWeight:800,color:T.text,marginTop:32,marginBottom:16}}>Our Mission</h2>
+          <p>To democratize professional trading by making AI-driven insights accessible to serious traders worldwide.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if(page==="blog") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"40px 24px"}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32}}>Blog</h1>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:24}}>
+          {[{title:"AI Trading Guide",date:"May 28"},{title:"Bitcoin Analysis",date:"May 27"},{title:"Gold Strategy",date:"May 26"}].map((post,i)=>(
+            <div key={i} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:24}}>
+              <div style={{fontSize:12,color:T.accent,marginBottom:8}}>{post.date}</div>
+              <h3 style={{fontSize:18,fontWeight:700,marginBottom:12}}>{post.title}</h3>
+              <button style={{background:T.accent,color:"#fff",border:"none",borderRadius:6,padding:"8px 16px",cursor:"pointer",fontFamily:T.font}}>Read More</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if(page==="careers") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"40px 24px"}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32}}>Careers</h1>
+        <div style={{display:"grid",gap:16}}>
+          {[{role:"Backend Engineer"},{role:"ML Engineer"},{role:"Full Stack Dev"},{role:"Data Scientist"}].map((job,i)=>(
+            <div key={i} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:20}}>
+              <div style={{fontWeight:700,fontSize:18,marginBottom:12}}>{job.role}</div>
+              <button style={{background:T.accent,color:"#fff",border:"none",borderRadius:6,padding:"8px 12px",cursor:"pointer",fontFamily:T.font}}>Apply</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if(page==="contact") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:600,margin:"0 auto",padding:"40px 24px"}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32}}>Contact Us</h1>
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:32}}>
+          <input placeholder="Email" style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:12,color:T.text,marginBottom:16,fontFamily:T.font,boxSizing:"border-box"}}/>
+          <textarea placeholder="Message" rows="6" style={{width:"100%",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:12,color:T.text,marginBottom:16,fontFamily:T.font,boxSizing:"border-box"}}/>
+          <button style={{width:"100%",background:T.accent,color:"#fff",border:"none",borderRadius:8,padding:12,cursor:"pointer",fontFamily:T.font,fontWeight:700}}>Send</button>
+        </div>
+        <div style={{marginTop:32,color:T.sub}}><strong>Email:</strong> support@fxaro.com</div>
+      </div>
+    </div>
+  );
+
+  if(page==="terms") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:800,margin:"0 auto",padding:"40px 24px",color:T.sub}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32,color:T.text}}>Terms of Service</h1>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>1. Agreement</h2>
+        <p style={{marginBottom:16}}>By accessing FXARO, you agree to be bound by these terms.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>2. Use License</h2>
+        <p style={{marginBottom:16}}>Permission is granted to use materials for personal, non-commercial viewing only.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>3. Disclaimer</h2>
+        <p>Trading involves substantial risk of loss. Past performance is not indicative of future results.</p>
+      </div>
+    </div>
+  );
+
+  if(page==="privacy") return(
+    <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text}}>
+      <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"0 24px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:T.accent,padding:"12px 0",cursor:"pointer",fontFamily:T.font}}>← Back Home</button>
+      </nav>
+      <div style={{maxWidth:800,margin:"0 auto",padding:"40px 24px",color:T.sub}}>
+        <h1 style={{fontSize:36,fontWeight:800,marginBottom:32,color:T.text}}>Privacy Policy</h1>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Data Collection</h2>
+        <p style={{marginBottom:16}}>We collect information you provide directly to us when creating an account or contacting support.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Data Usage</h2>
+        <p style={{marginBottom:16}}>Your information is used to provide services, process transactions, and send updates.</p>
+        <h2 style={{color:T.text,fontWeight:700,marginTop:24,marginBottom:12}}>Security</h2>
+        <p>We implement appropriate measures to protect your personal information against unauthorized access.</p>
+      </div>
+    </div>
+  );
 
   return(
     <div style={{background:T.bg,minHeight:"100vh",fontFamily:T.font,color:T.text,fontSize:14}}>
