@@ -1,5 +1,8 @@
 import FXARO from '../components/FXARO';
+import { getFxaroServerSideProps } from '../lib/fxaroInitialData';
 
-export default function ForexPage() {
-  return <FXARO initialView="Markets" marketCategory="Forex" />;
+export const getServerSideProps = getFxaroServerSideProps;
+
+export default function ForexPage({ initialData }) {
+  return <FXARO initialView="Markets" marketCategory="Forex" initialData={initialData} />;
 }

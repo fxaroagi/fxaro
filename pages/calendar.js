@@ -1,5 +1,8 @@
 import FXARO from '../components/FXARO';
+import { getFxaroServerSideProps } from '../lib/fxaroInitialData';
 
-export default function CalendarPage() {
-  return <FXARO initialView="Calendar" />;
+export const getServerSideProps = getFxaroServerSideProps;
+
+export default function CalendarPage({ initialData }) {
+  return <FXARO initialView="Calendar" initialData={initialData} />;
 }
