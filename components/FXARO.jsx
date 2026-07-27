@@ -382,17 +382,17 @@ function HeaderNav({ view, setView, setMarketTab }) {
         <span style={{ fontSize: 21, fontWeight: 950, color: T.accent, letterSpacing: -0.5, lineHeight: 1 }}>FX<span style={{ color: T.text }}>ARO</span></span>
         <span style={{ fontSize: 9, color: T.sub, letterSpacing: 3 }}>AI TRADING</span>
       </Link>
-      <div style={{ display: 'flex', gap: 2, flex: 1, overflowX: 'auto', alignItems: 'stretch' }}>
-        <details style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', gap: 2, flex: 1, overflow: 'visible', alignItems: 'stretch', minWidth: 0 }}>
+        <details style={{ position: 'relative', zIndex: 60 }}>
           <summary style={{ listStyle: 'none', color: view === 'Markets' ? T.accent : T.sub, background: view === 'Markets' ? `${T.accent}16` : 'transparent', borderBottom: view === 'Markets' ? `2px solid ${T.accent}` : '2px solid transparent', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap', cursor: 'pointer' }}>Markets ▾</summary>
-          <div style={{ position: 'absolute', top: 46, left: 0, zIndex: 30, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 190, boxShadow: '0 18px 48px rgba(0,0,0,.35)' }}>
-            {MARKET_LINKS.map(([text, href]) => <Link key={text} href={href} onClick={() => { setView('Markets'); setMarketTab(text === 'Indexes' ? 'Indexes' : text); }} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderBottom: `1px solid ${T.border}`, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
+          <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 999, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 220, padding: 6, boxShadow: '0 22px 70px rgba(0,0,0,.55)' }}>
+            {MARKET_LINKS.map(([text, href]) => <Link key={text} href={href} onClick={() => { setView('Markets'); setMarketTab(text === 'Indexes' ? 'Indexes' : text); }} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderRadius: 6, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
           </div>
         </details>
-        <details style={{ position: 'relative' }}>
+        <details style={{ position: 'relative', zIndex: 60 }}>
           <summary style={{ listStyle: 'none', color: T.sub, borderBottom: '2px solid transparent', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap', cursor: 'pointer' }}>Forecasts ▾</summary>
-          <div style={{ position: 'absolute', top: 46, left: 0, zIndex: 30, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 190, boxShadow: '0 18px 48px rgba(0,0,0,.35)' }}>
-            {['Commodities', 'Indexes', 'Currencies', 'Crypto', 'Bonds', 'Countries', 'Indicators'].map((text) => <Link key={text} href="/signals" onClick={() => setView('Signals')} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderBottom: `1px solid ${T.border}`, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
+          <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 999, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 220, padding: 6, boxShadow: '0 22px 70px rgba(0,0,0,.55)' }}>
+            {['Commodities', 'Indexes', 'Currencies', 'Crypto', 'Bonds', 'Countries', 'Indicators'].map((text) => <Link key={text} href="/signals" onClick={() => setView('Signals')} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderRadius: 6, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
           </div>
         </details>
         {nav.map(([label, href, v]) => <Link key={label} href={href} onClick={() => setView(v)} style={{ color: view === v ? T.accent : T.sub, background: view === v ? `${T.accent}16` : 'transparent', borderBottom: view === v ? `2px solid ${T.accent}` : '2px solid transparent', textDecoration: 'none', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap' }}>{label}</Link>)}
