@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 
 const T = {
@@ -369,6 +369,8 @@ function Footer() {
 }
 
 function HeaderNav({ view, setView, setMarketTab }) {
+  const [openMenu, setOpenMenu] = useState(null);
+  const navRef = useRef(null);
   const nav = [
     ['Calendar', '/calendar', 'Calendar'],
     ['News', '/news', 'News'],
@@ -376,26 +378,85 @@ function HeaderNav({ view, setView, setMarketTab }) {
     ['Countries', '/countries', 'Countries'],
     ['Signals', '/signals', 'Signals'],
   ];
+
+  useEffect(() => {
+    const closeOnOutside = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setOpenMenu(null);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
+
+  const menuButtonStyle = (active) => ({
+    color: active ? T.accent : T.sub,
+    background: active ? `${T.accent}16` : 'transparent',
+    border: 0,
+    borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
+    padding: '14px 12px',
+    fontSize: 12,
+    fontWeight: 850,
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    fontFamily: T.font,
+  });
+
+  const menuPanelStyle = {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    zIndex: 999,
+    background: T.surface,
+    border: `1px solid ${T.border}`,
+    borderRadius: 8,
+    minWidth: 220,
+    padding: 6,
+    boxShadow: '0 22px 70px rgba(0,0,0,.55)',
+  };
+
+  const menuLinkStyle = {
+    display: 'block',
+    color: T.text,
+    textDecoration: 'none',
+    padding: '10px 13px',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 750,
+  };
+
   return (
-    <nav style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: '0 22px', display: 'flex', alignItems: 'center', gap: 22, position: 'sticky', top: 0, zIndex: 20 }}>
+    <nav ref={navRef} style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: '0 22px', display: 'flex', alignItems: 'center', gap: 22, position: 'sticky', top: 0, zIndex: 20 }}>
       <Link href="/" style={{ textDecoration: 'none', padding: '11px 0', display: 'flex', flexDirection: 'column' }}>
         <span style={{ fontSize: 21, fontWeight: 950, color: T.accent, letterSpacing: -0.5, lineHeight: 1 }}>FX<span style={{ color: T.text }}>ARO</span></span>
         <span style={{ fontSize: 9, color: T.sub, letterSpacing: 3 }}>AI TRADING</span>
       </Link>
       <div style={{ display: 'flex', gap: 2, flex: 1, overflow: 'visible', alignItems: 'stretch', minWidth: 0 }}>
-        <details style={{ position: 'relative', zIndex: 60 }}>
-          <summary style={{ listStyle: 'none', color: view === 'Markets' ? T.accent : T.sub, background: view === 'Markets' ? `${T.accent}16` : 'transparent', borderBottom: view === 'Markets' ? `2px solid ${T.accent}` : '2px solid transparent', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap', cursor: 'pointer' }}>Markets ▾</summary>
-          <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 999, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 220, padding: 6, boxShadow: '0 22px 70px rgba(0,0,0,.55)' }}>
-            {MARKET_LINKS.map(([text, href]) => <Link key={text} href={href} onClick={() => { setView('Markets'); setMarketTab(text === 'Indexes' ? 'Indexes' : text); }} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderRadius: 6, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
-          </div>
-        </details>
-        <details style={{ position: 'relative', zIndex: 60 }}>
-          <summary style={{ listStyle: 'none', color: T.sub, borderBottom: '2px solid transparent', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap', cursor: 'pointer' }}>Forecasts ▾</summary>
-          <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 999, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, minWidth: 220, padding: 6, boxShadow: '0 22px 70px rgba(0,0,0,.55)' }}>
-            {['Commodities', 'Indexes', 'Currencies', 'Crypto', 'Bonds', 'Countries', 'Indicators'].map((text) => <Link key={text} href="/signals" onClick={() => setView('Signals')} style={{ display: 'block', color: T.text, textDecoration: 'none', padding: '10px 13px', borderRadius: 6, fontSize: 12, fontWeight: 750 }}>{text}</Link>)}
-          </div>
-        </details>
-        {nav.map(([label, href, v]) => <Link key={label} href={href} onClick={() => setView(v)} style={{ color: view === v ? T.accent : T.sub, background: view === v ? `${T.accent}16` : 'transparent', borderBottom: view === v ? `2px solid ${T.accent}` : '2px solid transparent', textDecoration: 'none', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap' }}>{label}</Link>)}
+        <div style={{ position: 'relative', zIndex: 60 }}>
+          <button type="button" aria-expanded={openMenu === 'markets'} onClick={() => setOpenMenu(openMenu === 'markets' ? null : 'markets')} style={menuButtonStyle(view === 'Markets')}>Markets ▾</button>
+          {openMenu === 'markets' && (
+            <div style={menuPanelStyle}>
+              {MARKET_LINKS.map(([text, href]) => <Link key={text} href={href} onClick={() => { setOpenMenu(null); setView('Markets'); setMarketTab(text === 'Indexes' ? 'Indexes' : text); }} style={menuLinkStyle}>{text}</Link>)}
+            </div>
+          )}
+        </div>
+        <div style={{ position: 'relative', zIndex: 60 }}>
+          <button type="button" aria-expanded={openMenu === 'forecasts'} onClick={() => setOpenMenu(openMenu === 'forecasts' ? null : 'forecasts')} style={menuButtonStyle(openMenu === 'forecasts')}>Forecasts ▾</button>
+          {openMenu === 'forecasts' && (
+            <div style={menuPanelStyle}>
+              {['Commodities', 'Indexes', 'Currencies', 'Crypto', 'Bonds', 'Countries', 'Indicators'].map((text) => <Link key={text} href="/signals" onClick={() => { setOpenMenu(null); setView('Signals'); }} style={menuLinkStyle}>{text}</Link>)}
+            </div>
+          )}
+        </div>
+        {nav.map(([label, href, v]) => <Link key={label} href={href} onClick={() => { setOpenMenu(null); setView(v); }} style={{ color: view === v ? T.accent : T.sub, background: view === v ? `${T.accent}16` : 'transparent', borderBottom: view === v ? `2px solid ${T.accent}` : '2px solid transparent', textDecoration: 'none', padding: '14px 12px', fontSize: 12, fontWeight: 850, whiteSpace: 'nowrap' }}>{label}</Link>)}
       </div>
       <div style={{ display: 'flex', gap: 8, whiteSpace: 'nowrap' }}>
         <button style={{ background: 'transparent', color: T.sub, border: `1px solid ${T.border}`, borderRadius: 6, padding: '7px 12px', fontWeight: 800 }}>Sign In</button>
