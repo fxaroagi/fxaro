@@ -6,11 +6,17 @@ const COUNTRIES = [
   ['US', 'United States'],
   ['GB', 'United Kingdom'],
   ['EUU', 'European Union'],
+  ['XC', 'Euro Area'],
   ['DE', 'Germany'],
   ['JP', 'Japan'],
   ['CN', 'China'],
   ['IN', 'India'],
   ['FR', 'France'],
+  ['RU', 'Russia'],
+  ['IT', 'Italy'],
+  ['CA', 'Canada'],
+  ['BR', 'Brazil'],
+  ['ES', 'Spain'],
 ];
 
 const INDICATORS = {
@@ -21,6 +27,7 @@ const INDICATORS = {
   unemployment: 'SL.UEM.TOTL.ZS',
   govBudget: 'GC.BAL.CASH.GD.ZS',
   debtGdp: 'GC.DOD.TOTL.GD.ZS',
+  population: 'SP.POP.TOTL',
 };
 
 function latestValue(payload) {

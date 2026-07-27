@@ -10,6 +10,15 @@ const YAHOO_GROUPS = {
     ['BZ=F', 'Brent Crude'],
     ['NG=F', 'Natural Gas'],
     ['HG=F', 'Copper'],
+    ['HO=F', 'Heating Oil'],
+    ['RB=F', 'Gasoline'],
+    ['ZC=F', 'Corn'],
+    ['ZW=F', 'Wheat'],
+    ['ZS=F', 'Soybeans'],
+    ['KC=F', 'Coffee'],
+    ['SB=F', 'Sugar'],
+    ['CT=F', 'Cotton'],
+    ['CC=F', 'Cocoa'],
   ],
   Indexes: [
     ['^GSPC', 'S&P 500'],
@@ -18,6 +27,8 @@ const YAHOO_GROUPS = {
     ['^FTSE', 'FTSE 100'],
     ['^GDAXI', 'DAX'],
     ['^N225', 'Nikkei 225'],
+    ['^FCHI', 'CAC 40'],
+    ['^HSI', 'Hang Seng'],
   ],
   Stocks: [
     ['AAPL', 'Apple'],
@@ -26,20 +37,47 @@ const YAHOO_GROUPS = {
     ['TSLA', 'Tesla'],
     ['AMZN', 'Amazon'],
     ['META', 'Meta Platforms'],
+    ['GOOGL', 'Alphabet'],
+    ['BRK-B', 'Berkshire Hathaway'],
+    ['LLY', 'Eli Lilly'],
+    ['AVGO', 'Broadcom'],
+    ['JPM', 'JPMorgan Chase'],
+    ['WMT', 'Walmart'],
+    ['V', 'Visa'],
+    ['MA', 'Mastercard'],
   ],
   Bonds: [
     ['^TNX', 'US 10Y Yield'],
     ['^FVX', 'US 5Y Yield'],
     ['^IRX', 'US 13W Bill'],
+    ['^TYX', 'US 30Y Yield'],
   ],
 };
 
 async function cryptoRows() {
-  const data = await fetchJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
+  const ids = 'bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,cardano,tron,avalanche-2,chainlink,polkadot,polygon,litecoin,bitcoin-cash,stellar,uniswap,near,aptos,internet-computer,ethereum-classic';
+  const data = await fetchJson(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
   return [
     ['bitcoin', 'BTC', 'Bitcoin'],
     ['ethereum', 'ETH', 'Ethereum'],
     ['solana', 'SOL', 'Solana'],
+    ['binancecoin', 'BNB', 'BNB'],
+    ['ripple', 'XRP', 'XRP'],
+    ['dogecoin', 'DOGE', 'Dogecoin'],
+    ['cardano', 'ADA', 'Cardano'],
+    ['tron', 'TRX', 'TRON'],
+    ['avalanche-2', 'AVAX', 'Avalanche'],
+    ['chainlink', 'LINK', 'Chainlink'],
+    ['polkadot', 'DOT', 'Polkadot'],
+    ['polygon', 'MATIC', 'Polygon'],
+    ['litecoin', 'LTC', 'Litecoin'],
+    ['bitcoin-cash', 'BCH', 'Bitcoin Cash'],
+    ['stellar', 'XLM', 'Stellar'],
+    ['uniswap', 'UNI', 'Uniswap'],
+    ['near', 'NEAR', 'NEAR Protocol'],
+    ['aptos', 'APT', 'Aptos'],
+    ['internet-computer', 'ICP', 'Internet Computer'],
+    ['ethereum-classic', 'ETC', 'Ethereum Classic'],
   ].map(([id, symbol, name]) => ({
     symbol,
     name,
@@ -74,7 +112,7 @@ async function yahooGroup(rows) {
 
 async function loadMarkets() {
   const [crypto, forex, commodities, indexes, stocks, bonds] = await Promise.all([
-    cryptoRows().catch(() => [stableFallback('BTC', 'Bitcoin'), stableFallback('ETH', 'Ethereum'), stableFallback('SOL', 'Solana')]),
+    cryptoRows().catch(() => [stableFallback('BTC', 'Bitcoin'), stableFallback('ETH', 'Ethereum'), stableFallback('SOL', 'Solana'), stableFallback('BNB', 'BNB'), stableFallback('XRP', 'XRP')]),
     forexRows().catch(() => [stableFallback('EUR/USD', 'Euro / US Dollar'), stableFallback('GBP/USD', 'Pound / US Dollar')]),
     yahooGroup(YAHOO_GROUPS.Commodities),
     yahooGroup(YAHOO_GROUPS.Indexes),
