@@ -405,15 +405,21 @@ function HeaderNav({ view, setView, setMarketTab }) {
   );
 }
 
-export default function FXARO({ initialView = 'Home', marketCategory, country, indicator }) {
+export default function FXARO({ initialView = 'Home', marketCategory, country, indicator, initialData = {} }) {
   const [view, setView] = useState(initialView);
   const [marketTab, setMarketTab] = useState(marketCategory || 'Commodities');
-  const [marketData, setMarketData] = useState({ markets: {}, ticker: [], updatedAt: null });
-  const [indicators, setIndicators] = useState({ countries: [], updatedAt: null });
-  const [calendar, setCalendar] = useState({ events: [] });
-  const [news, setNews] = useState([]);
-  const [signals, setSignals] = useState([]);
-  const [loading, setLoading] = useState({ markets: true, indicators: true, calendar: true, news: true, signals: true });
+  const [marketData, setMarketData] = useState(initialData.marketData || { markets: {}, ticker: [], updatedAt: null });
+  const [indicators, setIndicators] = useState(initialData.indicators || { countries: [], updatedAt: null });
+  const [calendar, setCalendar] = useState(initialData.calendar || { events: [] });
+  const [news, setNews] = useState(initialData.news || []);
+  const [signals, setSignals] = useState(initialData.signals || []);
+  const [loading, setLoading] = useState({
+    markets: !initialData.marketData,
+    indicators: !initialData.indicators,
+    calendar: !initialData.calendar,
+    news: !initialData.news,
+    signals: !initialData.signals,
+  });
 
   const loadJson = async (url, key, setter) => {
     setLoading((prev) => ({ ...prev, [key]: true }));
